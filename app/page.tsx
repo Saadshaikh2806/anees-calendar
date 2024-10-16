@@ -165,8 +165,8 @@ export default function Home() {
           </header>
           <main className="flex-grow p-2 md:p-3 text-white overflow-hidden flex flex-col">
             <div className="flex items-center justify-between mb-2 md:mb-3">
-              <h2 className="text-base md:text-lg lg:text-xl font-semibold text-white">Daily Activity Calendar</h2>
-              <span className="text-[0.65rem] text-gray-400">
+              <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-white">Daily Activity Calendar</h2>
+              <span className="text-xs md:text-sm text-gray-400">
                 Brought to you by{' '}
                 <a
                   href="https://www.instagram.com/saad__shaikh___/"
@@ -199,7 +199,7 @@ export default function Home() {
                 </div>
                 <div className="grid grid-cols-7 gap-1 flex-grow">
                   {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                    <div key={day} className="text-center font-semibold text-gray-400 text-xs">
+                    <div key={day} className="text-center font-semibold text-gray-400 text-xs md:text-sm">
                       {day}
                     </div>
                   ))}
@@ -224,7 +224,7 @@ export default function Home() {
                           onClick={() => setSelectedDate(day)}
                           className="flex flex-col h-full w-full text-left"
                         >
-                          <span className={`text-xs ${
+                          <span className={`text-xs md:text-sm ${
                             isSameMonth(day, currentMonth) ? 'text-gray-100' : 'text-gray-400'
                           } ${
                             isSelected || isCurrentDay ? 'font-bold' : ''
@@ -233,7 +233,7 @@ export default function Home() {
                           </span>
                           {activity && (
                             <div className="mt-auto w-full">
-                              <p className="font-medium text-purple-200 text-[0.6rem] leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
+                              <p className="font-medium text-purple-200 text-[0.6rem] md:text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
                                 {activity.name}
                               </p>
                             </div>
@@ -254,13 +254,13 @@ export default function Home() {
                 >
                   <div className="flex items-center space-x-2 mb-2">
                     <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                    <h3 className="text-sm md:text-base font-semibold text-white">
+                    <h3 className="text-sm md:text-base lg:text-lg font-semibold text-white">
                       {format(parseISO(selectedActivity.date), 'MMMM d, yyyy')}
                     </h3>
                   </div>
                   <div className="bg-gray-700/80 p-2 md:p-3 rounded-lg shadow-inner flex-grow overflow-y-auto">
-                    <h4 className="text-sm md:text-base font-semibold text-white mb-1 md:mb-2">{selectedActivity.name}</h4>
-                    <p className="text-xs text-gray-200">{selectedActivity.description}</p>
+                    <h4 className="text-sm md:text-base lg:text-lg font-semibold text-white mb-1 md:mb-2">{selectedActivity.name}</h4>
+                    <p className="text-xs md:text-sm text-gray-200">{selectedActivity.description}</p>
                   </div>
                 </motion.div>
               )}
