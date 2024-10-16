@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parseISO, isToday } from 'date-fns'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Shield } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
 import { Meteors } from '@/components/ui/MeteorEffect'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
@@ -203,7 +203,7 @@ export default function Home() {
                       {day}
                     </div>
                   ))}
-                  {monthDays.map((day, index) => {
+                  {monthDays.map((day) => {
                     const dateString = format(day, 'yyyy-MM-dd');
                     const activity = uniqueActivities.get(dateString);
                     const isSelected = isSameDay(day, selectedDate);

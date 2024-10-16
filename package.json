@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next-on-netlify",
+    "build": "next build ",
     "start": "next start",
     "lint": "next lint"
-    
   },
   "dependencies": {
     "@netlify/plugin-nextjs": "^5.8.0",
@@ -15,15 +14,14 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "find-cache-dir": "^5.0.0",
     "framer-motion": "^11.11.9",
     "lucide-react": "^0.453.0",
     "next": "14.2.15",
-    "next-on-netlify": "^3.0.1",
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7"
-    
   },
   "devDependencies": {
     "@types/node": "^20",
