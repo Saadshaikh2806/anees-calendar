@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 :root {
   --background: #ffffff;
@@ -18,10 +18,48 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  background-color: #000000; /* Black background */
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+@keyframes meteor {
+  0% {
+    transform: rotate(215deg) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(215deg) translateX(-500px);
+    opacity: 0;
+  }
+}
+
+.animate-meteor {
+  animation: meteor linear;
+}
+
+.bg-custom {
+  background-color: #1636c4; /* Dark purple for UI elements */
+}
+
+.text-custom {
+  color: #FFFFFF; /* White text for better contrast */
+}
+
+.button-custom {
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  background-color: #6A5ACD; /* Lighter purple for buttons */
+  color: #FFFFFF; /* White text for buttons */
+}
+
+.button-custom:hover {
+  background-color: #8A2BE2; /* Even lighter purple on hover */
+  transform: scale(1.05); /* Slightly enlarge on hover */
 }
