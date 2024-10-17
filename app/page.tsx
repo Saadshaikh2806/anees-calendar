@@ -132,13 +132,7 @@ const fadeInUp = {
   transition: { duration: 0.5, ease: [0.43, 0.13, 0.23, 0.96] }
 }
 
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.07
-    }
-  }
-}
+
 
 const pageTransition = {
   type: "tween",
