@@ -5,6 +5,10 @@ import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-reac
 import { Meteors } from '@/components/ui/MeteorEffect'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { Inter, Roboto } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'] })
+const roboto = Roboto({ weight: ['400', '500', '700'], subsets: ['latin'] })
 
 const activities = [
   { name: 'Science Quiz', description: 'Test your knowledge on various scientific topics with fun quizzes.' },
@@ -135,18 +139,30 @@ export default function Home() {
   const selectedActivity = uniqueActivities.get(format(selectedDate, 'yyyy-MM-dd'))
 
   return (
-    <div className="h-screen flex flex-col bg-black p-2 md:p-3 lg:p-4">
+    <div className={`h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 ${inter.className}`}>
       <div className="flex-grow relative overflow-hidden flex flex-col">
         <div className="absolute inset-0 overflow-hidden">
           <Meteors number={70} />
         </div>
         <motion.div 
-          className="w-full max-w-6xl mx-auto bg-gray-900/60 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden relative z-10 flex flex-col flex-grow"
-          initial={{ boxShadow: '0 0 0 0 rgba(147, 51, 234, 0)' }}
-          animate={{ boxShadow: '0 0 30px 10px rgba(147, 51, 234, 0.5)' }}
+          className="w-full max-w-6xl mx-auto bg-white backdrop-blur-sm rounded-xl shadow-lg overflow-hidden relative z-10 flex flex-col flex-grow"
+          initial={{ boxShadow: '0 0 0 0 rgba(0, 0, 0, 0)' }}
+          animate={{ boxShadow: '0 0 30px 10px rgba(59, 130, 246, 0.1)' }}
           transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse' }}
         >
-          <header className="bg-gray-800/80 text-white py-4 px-4 border-b border-purple-500/30">
+          {/* Header */}
+          <header className="bg-gray-100 text-gray-800 py-4 px-4 border-b border-gray-200 relative">
+            <div className="absolute top-2 right-2 text-xs text-gray-600">
+              Brought to you by{' '}
+              <a
+                href="https://www.instagram.com/saad__shaikh___/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                Saad Shaikh
+              </a>
+            </div>
             <div className="flex flex-col items-center text-center">
               <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden flex-shrink-0 relative mb-3">
                 <Image 
@@ -154,52 +170,42 @@ export default function Home() {
                   alt="ANEES Logo" 
                   layout="fill"
                   objectFit="cover"
-                  className="invert"
                 />
               </div>
               <div>
-                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white">ANEES Defence Career Institute</h1>
-                <p className="text-sm md:text-base lg:text-lg text-gray-200 mt-1">Empowering young minds for a brighter future</p>
+                <h1 className={`text-xl md:text-2xl lg:text-3xl font-bold text-blue-600 ${roboto.className}`}>ANEES Defence Career Institute</h1>
+                <p className="text-sm md:text-base lg:text-lg text-gray-700 mt-1">Empowering young minds for a brighter future</p>
               </div>
             </div>
           </header>
-          <main className="flex-grow p-2 md:p-3 text-white overflow-hidden flex flex-col">
+          
+          {/* Main content */}
+          <main className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col">
             <div className="flex items-center justify-between mb-2 md:mb-3">
-              <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-white">Daily Activity Calendar</h2>
-              <span className="text-xs md:text-sm text-gray-400">
-                Brought to you by{' '}
-                <a
-                  href="https://www.instagram.com/saad__shaikh___/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-purple-400 hover:text-purple-300 transition-colors"
-                >
-                  Saad Shaikh
-                </a>
-              </span>
+              <h2 className={`text-lg md:text-xl lg:text-2xl font-semibold text-blue-600 ${roboto.className}`}>Daily Activity Calendar</h2>
             </div>
             <div className="flex flex-col md:flex-row md:space-x-4 flex-grow overflow-hidden">
-              <div className="flex-grow bg-gray-800/70 rounded-xl shadow-lg p-2 md:p-3 mb-3 md:mb-0 border border-purple-500/30 overflow-hidden flex flex-col">
+              <div className="flex-grow bg-white rounded-xl shadow-md p-2 md:p-3 mb-3 md:mb-0 border border-gray-200 overflow-hidden flex flex-col">
                 <div className="flex items-center justify-between mb-2">
                   <button
                     onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                    className="bg-purple-600 p-1 rounded-full hover:bg-purple-700 transition-colors"
+                    className="bg-blue-500 p-1 rounded-full hover:bg-blue-600 transition-colors"
                   >
                     <ChevronLeft className="h-4 w-4 text-white" />
                   </button>
-                  <h3 className="text-sm md:text-base lg:text-lg font-bold text-purple-300">
+                  <h3 className="text-sm md:text-base lg:text-lg font-bold text-blue-600">
                     {format(currentMonth, 'MMMM yyyy')}
                   </h3>
                   <button
                     onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                    className="bg-purple-600 p-1 rounded-full hover:bg-purple-700 transition-colors"
+                    className="bg-blue-500 p-1 rounded-full hover:bg-blue-600 transition-colors"
                   >
                     <ChevronRight className="h-4 w-4 text-white" />
                   </button>
                 </div>
                 <div className="grid grid-cols-7 gap-1 flex-grow">
                   {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                    <div key={day} className="text-center font-semibold text-gray-400 text-xs md:text-sm">
+                    <div key={day} className="text-center font-semibold text-blue-600 text-xs md:text-sm">
                       {day}
                     </div>
                   ))}
@@ -213,11 +219,11 @@ export default function Home() {
                         key={day.toISOString()}
                         whileHover={{ scale: 1.05 }}
                         className={`p-1 rounded-[0.3rem] ${
-                          isSameMonth(day, currentMonth) ? 'bg-gray-700' : 'bg-gray-800'
+                          isSameMonth(day, currentMonth) ? 'bg-gradient-to-br from-gray-100 to-gray-200' : 'bg-gray-50'
                         } ${
-                          isSelected ? 'ring-2 ring-purple-500' : ''
+                          isSelected ? 'ring-2 ring-blue-400' : ''
                         } ${
-                          isCurrentDay ? 'bg-purple-600' : ''
+                          isCurrentDay ? 'bg-blue-100 shadow-[0_0_10px_rgba(59,130,246,0.5)]' : ''
                         } flex flex-col transition-all relative overflow-hidden h-full`}
                       >
                         <button
@@ -225,7 +231,7 @@ export default function Home() {
                           className="flex flex-col h-full w-full text-left"
                         >
                           <span className={`text-xs md:text-sm ${
-                            isSameMonth(day, currentMonth) ? 'text-gray-100' : 'text-gray-400'
+                            isSameMonth(day, currentMonth) ? 'text-black' : 'text-gray-400'
                           } ${
                             isSelected || isCurrentDay ? 'font-bold' : ''
                           } z-10 relative`}>
@@ -233,7 +239,7 @@ export default function Home() {
                           </span>
                           {activity && (
                             <div className="mt-auto w-full">
-                              <p className="font-medium text-purple-200 text-[0.6rem] md:text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
+                              <p className="font-medium text-black text-[0.6rem] md:text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
                                 {activity.name}
                               </p>
                             </div>
@@ -250,23 +256,25 @@ export default function Home() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="w-full md:w-80 lg:w-96 bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-lg p-3 md:p-4 flex flex-col border border-purple-500/30 h-[180px] md:h-full"
+                  className="w-full md:w-80 lg:w-96 bg-white/70 backdrop-blur-sm rounded-xl shadow-lg p-3 md:p-4 flex flex-col border border-gray-200 h-[180px] md:h-full"
                 >
                   <div className="flex items-center space-x-2 mb-3">
-                    <CalendarIcon className="h-5 w-5 md:h-6 md:w-6 text-purple-400" />
-                    <h3 className="text-base md:text-lg lg:text-xl font-semibold text-white">
+                    <CalendarIcon className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
+                    <h3 className="text-base md:text-lg lg:text-xl font-semibold text-black">
                       {format(parseISO(selectedActivity.date), 'MMMM d, yyyy')}
                     </h3>
                   </div>
-                  <div className="bg-gray-700/80 p-3 md:p-4 rounded-lg shadow-inner flex-grow overflow-y-auto">
-                    <h4 className="text-base md:text-lg lg:text-xl font-semibold text-purple-300 mb-2 md:mb-3">{selectedActivity.name}</h4>
-                    <p className="text-sm md:text-base text-gray-200">{selectedActivity.description}</p>
+                  <div className="bg-white/80 p-3 md:p-4 rounded-lg shadow-inner flex-grow overflow-y-auto">
+                    <h4 className="text-base md:text-lg lg:text-xl font-semibold text-black mb-2 md:mb-3">{selectedActivity.name}</h4>
+                    <p className="text-sm md:text-base text-black">{selectedActivity.description}</p>
                   </div>
                 </motion.div>
               )}
             </div>
           </main>
-          <footer className="bg-gray-800/80 text-gray-400 p-2 md:p-3 border-t border-purple-500/30">
+          
+          {/* Footer */}
+          <footer className="bg-white/80 text-gray-600 p-2 md:p-3 border-t border-gray-200">
             <div className="text-center text-xs">
               <p>&copy; {new Date().getFullYear()} ANEES Defence Career Institute. All rights reserved.</p>
             </div>
