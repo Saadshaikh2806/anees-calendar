@@ -1,9 +1,8 @@
 'use client'
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parseISO, isToday } from 'date-fns'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
-import { Meteors } from '@/components/ui/MeteorEffect'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { Inter, Roboto } from 'next/font/google'
 
@@ -126,9 +125,32 @@ function generateUniqueActivities() {
   return activityMap
 }
 
+const fadeInUp = {
+  initial: { opacity: 0, y: 20, filter: "blur(10px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  exit: { opacity: 0, y: -20, filter: "blur(10px)" },
+  transition: { duration: 0.5, ease: [0.43, 0.13, 0.23, 0.96] }
+}
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.07
+    }
+  }
+}
+
+const pageTransition = {
+  type: "tween",
+  ease: "anticipate",
+  duration: 0.5
+}
+
 export default function Home() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [isLoading, setIsLoading] = useState(true)
+  const [showContent, setShowContent] = useState(false)
 
   const uniqueActivities = useMemo(() => generateUniqueActivities(), [])
 
@@ -138,20 +160,32 @@ export default function Home() {
 
   const selectedActivity = uniqueActivities.get(format(selectedDate, 'yyyy-MM-dd'))
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+      setShowContent(true)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className={`h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 ${inter.className}`}>
-      <div className="flex-grow relative overflow-hidden flex flex-col">
-        <div className="absolute inset-0 overflow-hidden">
-          <Meteors number={70} />
-        </div>
+      <motion.div
+        initial={{ filter: "blur(10px)", opacity: 0.3 }}
+        animate={{ 
+          filter: showContent ? "blur(0px)" : "blur(10px)",
+          opacity: showContent ? 1 : 0.3
+        }}
+        transition={{ duration: 0.5 }}
+        className="flex-grow relative overflow-hidden flex flex-col"
+      >
         <motion.div 
-          className="w-full max-w-6xl mx-auto bg-white backdrop-blur-sm rounded-xl shadow-lg overflow-hidden relative z-10 flex flex-col flex-grow"
-          initial={{ boxShadow: '0 0 0 0 rgba(0, 0, 0, 0)' }}
-          animate={{ boxShadow: '0 0 30px 10px rgba(59, 130, 246, 0.1)' }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse' }}
+          className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden relative z-10 flex flex-col flex-grow"
+          variants={fadeInUp}
+          transition={pageTransition}
         >
           {/* Header */}
-          <header className="bg-gray-100 text-gray-800 py-4 px-4 border-b border-gray-200 relative">
+          <motion.header variants={fadeInUp} transition={pageTransition} className="bg-gray-100 text-gray-800 py-4 px-4 border-b border-gray-200 relative">
             <div className="absolute top-2 right-2 text-xs text-gray-600">
               Brought to you by{' '}
               <a
@@ -177,10 +211,10 @@ export default function Home() {
                 <p className="text-sm md:text-base lg:text-lg text-gray-700 mt-1">Empowering young minds for a brighter future</p>
               </div>
             </div>
-          </header>
+          </motion.header>
           
           {/* Main content */}
-          <main className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col">
+          <motion.main variants={fadeInUp} transition={pageTransition} className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col">
             <div className="flex items-center justify-between mb-2 md:mb-3">
               <h2 className={`text-lg md:text-xl lg:text-2xl font-semibold text-blue-600 ${roboto.className}`}>Daily Activity Calendar</h2>
             </div>
@@ -271,16 +305,43 @@ export default function Home() {
                 </motion.div>
               )}
             </div>
-          </main>
+          </motion.main>
           
           {/* Footer */}
-          <footer className="bg-white/80 text-gray-600 p-2 md:p-3 border-t border-gray-200">
+          <motion.footer variants={fadeInUp} transition={pageTransition} className="bg-white/80 text-gray-600 p-2 md:p-3 border-t border-gray-200">
             <div className="text-center text-xs">
               <p>&copy; {new Date().getFullYear()} ANEES Defence Career Institute. All rights reserved.</p>
             </div>
-          </footer>
+          </motion.footer>
         </motion.div>
-      </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            key="loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 bg-white flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.5, ease: [0.43, 0.13, 0.23, 0.96] }}
+            >
+              <Image 
+                src="/1.png" 
+                alt="ANEES Logo" 
+                width={150}
+                height={150}
+                className="animate-pulse"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
