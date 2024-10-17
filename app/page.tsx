@@ -328,8 +328,8 @@ export default function Home() {
               <Image 
                 src="/1.png" 
                 alt="ANEES Logo" 
-                width={150}
-                height={150}
+                width={250}  // Increased from 150
+                height={250} // Increased from 150
                 className="animate-pulse"
               />
             </motion.div>
