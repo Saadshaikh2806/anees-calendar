@@ -250,17 +250,17 @@ export default function Home() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="w-full md:w-64 lg:w-72 bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-lg p-2 md:p-3 flex flex-col border border-purple-500/30 h-[140px] md:h-[200px]"
+                  className="w-full md:w-80 lg:w-96 bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-lg p-3 md:p-4 flex flex-col border border-purple-500/30 h-[180px] md:h-full"
                 >
-                  <div className="flex items-center space-x-2 mb-2">
-                    <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                    <h3 className="text-sm md:text-base lg:text-lg font-semibold text-white">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <CalendarIcon className="h-5 w-5 md:h-6 md:w-6 text-purple-400" />
+                    <h3 className="text-base md:text-lg lg:text-xl font-semibold text-white">
                       {format(parseISO(selectedActivity.date), 'MMMM d, yyyy')}
                     </h3>
                   </div>
-                  <div className="bg-gray-700/80 p-2 md:p-3 rounded-lg shadow-inner flex-grow overflow-y-auto">
-                    <h4 className="text-sm md:text-base lg:text-lg font-semibold text-white mb-1 md:mb-2">{selectedActivity.name}</h4>
-                    <p className="text-xs md:text-sm text-gray-200">{selectedActivity.description}</p>
+                  <div className="bg-gray-700/80 p-3 md:p-4 rounded-lg shadow-inner flex-grow overflow-y-auto">
+                    <h4 className="text-base md:text-lg lg:text-xl font-semibold text-purple-300 mb-2 md:mb-3">{selectedActivity.name}</h4>
+                    <p className="text-sm md:text-base text-gray-200">{selectedActivity.description}</p>
                   </div>
                 </motion.div>
               )}
