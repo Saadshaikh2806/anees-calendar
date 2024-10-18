@@ -112,8 +112,8 @@ const activities = [
   { name: 'Storytelling from Photos', description: 'Choose a photo and create a backstory or fictional tale about it.' }
 ];
 
-function generateUniqueActivities() {
-  const activityMap = new Map()
+function generateUniqueActivities(): Map<string, Activity> {
+  const activityMap = new Map<string, Activity>()
 
   for (let i = 0; i < 366; i++) {
     const date = new Date(2024, 0, i + 1)
@@ -140,13 +140,19 @@ const pageTransition = {
   duration: 0.5
 }
 
+interface Activity {
+  name: string;
+  description: string;
+  date: string;
+}
+
 export default function Home() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isLoading, setIsLoading] = useState(true)
   const [showContent, setShowContent] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchResults, setSearchResults] = useState([])
+  const [searchResults, setSearchResults] = useState<Activity[]>([])
   const [calendarKey, setCalendarKey] = useState(0)
 
   const uniqueActivities = useMemo(() => generateUniqueActivities(), [])
@@ -165,7 +171,7 @@ export default function Home() {
     return () => clearTimeout(timer)
   }, [])
 
-  const handleSearch = (term) => {
+  const handleSearch = (term: string) => {
     setSearchTerm(term)
     if (term.length > 0) {
       const today = new Date()
@@ -186,7 +192,7 @@ export default function Home() {
     }
   }
 
-  const handleSearchResultClick = (result) => {
+  const handleSearchResultClick = (result: Activity) => {
     const resultDate = parseISO(result.date)
     setSelectedDate(resultDate)
     setCurrentMonth(startOfMonth(resultDate))
@@ -310,7 +316,7 @@ export default function Home() {
                     ))}
                     {monthDays.map((day) => {
                       const dateString = format(day, 'yyyy-MM-dd');
-                      const activity = uniqueActivities.get(dateString);
+                      const activity = uniqueActivities.get(dateString) as Activity | undefined;
                       const isSelected = isSameDay(day, selectedDate);
                       const isCurrentDay = isToday(day);
                       return (
