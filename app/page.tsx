@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useMemo, useEffect } from 'react'
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parseISO, isToday } from 'date-fns'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parseISO, isToday, differenceInDays } from 'date-fns'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Search } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { Inter, Roboto } from 'next/font/google'
@@ -145,6 +145,9 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [isLoading, setIsLoading] = useState(true)
   const [showContent, setShowContent] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [calendarKey, setCalendarKey] = useState(0)
 
   const uniqueActivities = useMemo(() => generateUniqueActivities(), [])
 
@@ -161,6 +164,36 @@ export default function Home() {
     }, 1000)
     return () => clearTimeout(timer)
   }, [])
+
+  const handleSearch = (term) => {
+    setSearchTerm(term)
+    if (term.length > 0) {
+      const today = new Date()
+      const results = Array.from(uniqueActivities.values())
+        .filter(activity => 
+          activity.name.toLowerCase().includes(term.toLowerCase()) ||
+          activity.description.toLowerCase().includes(term.toLowerCase())
+        )
+        .sort((a, b) => {
+          const diffA = Math.abs(differenceInDays(parseISO(a.date), today))
+          const diffB = Math.abs(differenceInDays(parseISO(b.date), today))
+          return diffA - diffB
+        })
+        .slice(0, 5) // Limit to 5 results
+      setSearchResults(results)
+    } else {
+      setSearchResults([])
+    }
+  }
+
+  const handleSearchResultClick = (result) => {
+    const resultDate = parseISO(result.date)
+    setSelectedDate(resultDate)
+    setCurrentMonth(startOfMonth(resultDate))
+    setCalendarKey(prev => prev + 1) // Trigger re-render for animation
+    setSearchTerm('')
+    setSearchResults([])
+  }
 
   return (
     <div className={`h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 ${inter.className}`}>
@@ -211,73 +244,112 @@ export default function Home() {
           <motion.main variants={fadeInUp} transition={pageTransition} className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col">
             <div className="flex items-center justify-between mb-2 md:mb-3">
               <h2 className={`text-lg md:text-xl lg:text-2xl font-semibold text-blue-600 ${roboto.className}`}>Daily Activity Calendar</h2>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search activities..."
+                  value={searchTerm}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="pl-8 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                {searchResults.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                    {searchResults.map((result, index) => (
+                      <div 
+                        key={index} 
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleSearchResultClick(result)}
+                      >
+                        <p className="font-semibold">{result.name}</p>
+                        <p className="text-sm text-gray-600">{format(parseISO(result.date), 'MMMM d, yyyy')}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex flex-col md:flex-row md:space-x-4 flex-grow overflow-hidden">
-              <div className="flex-grow bg-white rounded-xl shadow-md p-2 md:p-3 mb-3 md:mb-0 border border-gray-200 overflow-hidden flex flex-col">
-                <div className="flex items-center justify-between mb-2">
-                  <button
-                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                    className="bg-blue-500 p-1 rounded-full hover:bg-blue-600 transition-colors"
-                  >
-                    <ChevronLeft className="h-4 w-4 text-white" />
-                  </button>
-                  <h3 className="text-sm md:text-base lg:text-lg font-bold text-blue-600">
-                    {format(currentMonth, 'MMMM yyyy')}
-                  </h3>
-                  <button
-                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                    className="bg-blue-500 p-1 rounded-full hover:bg-blue-600 transition-colors"
-                  >
-                    <ChevronRight className="h-4 w-4 text-white" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-7 gap-1 flex-grow">
-                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                    <div key={day} className="text-center font-semibold text-blue-600 text-xs md:text-sm">
-                      {day}
-                    </div>
-                  ))}
-                  {monthDays.map((day) => {
-                    const dateString = format(day, 'yyyy-MM-dd');
-                    const activity = uniqueActivities.get(dateString);
-                    const isSelected = isSameDay(day, selectedDate);
-                    const isCurrentDay = isToday(day);
-                    return (
-                      <motion.div
-                        key={day.toISOString()}
-                        whileHover={{ scale: 1.05 }}
-                        className={`p-1 rounded-[0.3rem] ${
-                          isSameMonth(day, currentMonth) ? 'bg-gradient-to-br from-gray-100 to-gray-200' : 'bg-gray-50'
-                        } ${
-                          isSelected ? 'ring-2 ring-blue-400' : ''
-                        } ${
-                          isCurrentDay ? 'bg-blue-100 shadow-[0_0_10px_rgba(59,130,246,0.5)]' : ''
-                        } flex flex-col transition-all relative overflow-hidden h-full`}
-                      >
-                        <button
-                          onClick={() => setSelectedDate(day)}
-                          className="flex flex-col h-full w-full text-left"
-                        >
-                          <span className={`text-xs md:text-sm ${
-                            isSameMonth(day, currentMonth) ? 'text-black' : 'text-gray-400'
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={calendarKey}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex-grow bg-white rounded-xl shadow-md p-2 md:p-3 mb-3 md:mb-0 border border-gray-200 overflow-hidden flex flex-col"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <button
+                      onClick={() => {
+                        setCurrentMonth(subMonths(currentMonth, 1))
+                        setCalendarKey(prev => prev + 1)
+                      }}
+                      className="bg-blue-500 p-1 rounded-full hover:bg-blue-600 transition-colors"
+                    >
+                      <ChevronLeft className="h-4 w-4 text-white" />
+                    </button>
+                    <h3 className="text-sm md:text-base lg:text-lg font-bold text-blue-600">
+                      {format(currentMonth, 'MMMM yyyy')}
+                    </h3>
+                    <button
+                      onClick={() => {
+                        setCurrentMonth(addMonths(currentMonth, 1))
+                        setCalendarKey(prev => prev + 1)
+                      }}
+                      className="bg-blue-500 p-1 rounded-full hover:bg-blue-600 transition-colors"
+                    >
+                      <ChevronRight className="h-4 w-4 text-white" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-7 gap-1 flex-grow">
+                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
+                      <div key={day} className="text-center font-semibold text-blue-600 text-xs md:text-sm">
+                        {day}
+                      </div>
+                    ))}
+                    {monthDays.map((day) => {
+                      const dateString = format(day, 'yyyy-MM-dd');
+                      const activity = uniqueActivities.get(dateString);
+                      const isSelected = isSameDay(day, selectedDate);
+                      const isCurrentDay = isToday(day);
+                      return (
+                        <motion.div
+                          key={day.toISOString()}
+                          whileHover={{ scale: 1.05 }}
+                          className={`p-1 rounded-[0.3rem] ${
+                            isSameMonth(day, currentMonth) ? 'bg-gradient-to-br from-gray-100 to-gray-200' : 'bg-gray-50'
                           } ${
-                            isSelected || isCurrentDay ? 'font-bold' : ''
-                          } z-10 relative`}>
-                            {format(day, 'd')}
-                          </span>
-                          {activity && (
-                            <div className="mt-auto w-full">
-                              <p className="font-medium text-black text-[0.6rem] md:text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
-                                {activity.name}
-                              </p>
-                            </div>
-                          )}
-                        </button>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
+                            isSelected ? 'ring-2 ring-blue-400' : ''
+                          } ${
+                            isCurrentDay ? 'bg-blue-100 shadow-[0_0_10px_rgba(59,130,246,0.5)]' : ''
+                          } flex flex-col transition-all relative overflow-hidden h-full`}
+                        >
+                          <button
+                            onClick={() => setSelectedDate(day)}
+                            className="flex flex-col h-full w-full text-left"
+                          >
+                            <span className={`text-xs md:text-sm ${
+                              isSameMonth(day, currentMonth) ? 'text-black' : 'text-gray-400'
+                            } ${
+                              isSelected || isCurrentDay ? 'font-bold' : ''
+                            } z-10 relative`}>
+                              {format(day, 'd')}
+                            </span>
+                            {activity && (
+                              <div className="mt-auto w-full">
+                                <p className="font-medium text-black text-[0.6rem] md:text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
+                                  {activity.name}
+                                </p>
+                              </div>
+                            )}
+                          </button>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
               
               {selectedActivity && (
                 <motion.div 
