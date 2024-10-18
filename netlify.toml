@@ -1,6 +1,19 @@
 [build]
 command = "npm run build"
 publish = ".next"
+functions = "netlify/functions"
 
 [[plugins]]
 package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/api/:splat"
+status = 200
+force = true
+
+[dev]
+framework = "next"
+targetPort = 3000
+port = 8888
+

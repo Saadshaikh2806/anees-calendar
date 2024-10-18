@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parseISO, isToday, differenceInDays } from 'date-fns'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Search, UserCog } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { Inter, Roboto } from 'next/font/google'
+import axios from 'axios';
+import styles from './scrollbar.module.css';
 
 const inter = Inter({ subsets: ['latin'] })
 const roboto = Roboto({ weight: ['400', '500', '700'], subsets: ['latin'] })
@@ -112,19 +115,6 @@ const activities = [
   { name: 'Storytelling from Photos', description: 'Choose a photo and create a backstory or fictional tale about it.' }
 ];
 
-function generateUniqueActivities(): Map<string, Activity> {
-  const activityMap = new Map<string, Activity>()
-
-  for (let i = 0; i < 366; i++) {
-    const date = new Date(2024, 0, i + 1)
-    const dateString = format(date, 'yyyy-MM-dd')
-    const activity = activities[i % activities.length] // Cycle through activities
-    activityMap.set(dateString, { ...activity, date: dateString })
-  }
-
-  return activityMap
-}
-
 const fadeInUp = {
   initial: { opacity: 0, y: 20, filter: "blur(10px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
@@ -146,6 +136,9 @@ interface Activity {
   date: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8888/.netlify/functions/api';
+console.log('API_URL:', API_URL);
+
 export default function Home() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -154,8 +147,13 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState<Activity[]>([])
   const [calendarKey, setCalendarKey] = useState(0)
+  const [showAdminModal, setShowAdminModal] = useState(false)
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
+  const [adminPassword, setAdminPassword] = useState('')
+  const [showAdminDropdown, setShowAdminDropdown] = useState(false);
 
-  const uniqueActivities = useMemo(() => generateUniqueActivities(), [])
+  const [uniqueActivities, setUniqueActivities] = useState<Map<string, Activity>>(new Map());
+  const [activities, setActivities] = useState<Activity[]>([]);
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
@@ -165,11 +163,47 @@ export default function Home() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsLoading(false)
-      setShowContent(true)
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [])
+      setShowContent(true);
+    }, 500); // 500ms delay, adjust as needed
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    setIsLoading(true);
+    axios.get(`${API_URL}/activities`)
+      .then(response => {
+        console.log('Fetched activities:', response.data);
+        if (response.data.length === 0) {
+          // If no activities in API, initialize with default activities
+          const defaultActivities = generateDefaultActivities();
+          axios.post(`${API_URL}/activities/initialize`, defaultActivities)
+            .then(() => {
+              const activityMap = new Map(defaultActivities.map(a => [a.date, a]));
+              setUniqueActivities(activityMap);
+              setActivities(defaultActivities);
+            })
+            .catch(error => console.error('Error initializing activities:', error));
+        } else {
+          // If activities exist, use them
+          const activityMap = new Map(
+            response.data.map((a: Activity) => [a.date, a])
+          ) as Map<string, Activity>;
+          setUniqueActivities(activityMap);
+          setActivities(response.data);
+        }
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching activities:', error);
+        setIsLoading(false);
+      });
+  }, [API_URL]);
+
+  useEffect(() => {
+    console.log('Current activities:', activities);
+    console.log('Current uniqueActivities:', Array.from(uniqueActivities.entries()));
+  }, [activities, uniqueActivities]);
 
   const handleSearch = (term: string) => {
     setSearchTerm(term)
@@ -201,6 +235,67 @@ export default function Home() {
     setSearchResults([])
   }
 
+  const handleEditActivity = (date: string) => {
+    const activity = uniqueActivities.get(date);
+    const newName = prompt('Enter new activity name:', activity?.name);
+    const newDescription = prompt('Enter new activity description:', activity?.description);
+
+    if (newName && newDescription) {
+      axios.put(`${API_URL}/activities/${date}`, { name: newName, description: newDescription })
+        .then(response => {
+          console.log('Activity updated:', response.data);
+          const updatedActivity: Activity = response.data;
+          setUniqueActivities(prevActivities => {
+            const newActivities = new Map(prevActivities);
+            newActivities.set(date, updatedActivity);
+            return newActivities;
+          });
+          setActivities(prevActivities => 
+            prevActivities.map(a => a.date === date ? updatedActivity : a)
+          );
+          setCalendarKey(prevKey => prevKey + 1);
+        })
+        .catch(error => {
+          console.error('Error updating activity:', error);
+          alert('Failed to update activity. Please try again.');
+        });
+    }
+  };
+
+  const handleDeleteActivity = (date: string) => {
+    if (confirm('Are you sure you want to delete this activity?')) {
+      axios.delete(`${API_URL}/activities/${date}`)
+        .then(() => {
+          console.log('Activity deleted');
+          setUniqueActivities(prevActivities => {
+            const newActivities = new Map(prevActivities);
+            newActivities.delete(date);
+            return newActivities;
+          });
+          setActivities(prevActivities => prevActivities.filter(a => a.date !== date));
+          setCalendarKey(prevKey => prevKey + 1);
+        })
+        .catch(error => {
+          console.error('Error deleting activity:', error);
+          alert('Failed to delete activity. Please try again.');
+        });
+    }
+  };
+
+  const handleLogout = () => {
+    // Save activities to local storage
+    localStorage.setItem('activities', JSON.stringify(Array.from(uniqueActivities.entries())));
+    
+    // Reset admin state
+    setIsAdminLoggedIn(false);
+    
+    // Optionally, you might want to reset other admin-related states here
+    
+    alert('Logged out successfully. Activities have been saved.');
+  };
+
+  console.log('isAdminLoggedIn:', isAdminLoggedIn);
+
   return (
     <div className={`h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 ${inter.className}`}>
       <motion.div
@@ -213,13 +308,13 @@ export default function Home() {
         className="flex-grow relative overflow-hidden flex flex-col"
       >
         <motion.div 
-          className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden relative z-10 flex flex-col flex-grow"
+          className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.1)] overflow-hidden relative z-10 flex flex-col flex-grow"
           variants={fadeInUp}
           transition={pageTransition}
         >
           {/* Header */}
-          <motion.header variants={fadeInUp} transition={pageTransition} className="bg-gray-100 text-gray-800 py-4 px-4 border-b border-gray-200 relative">
-            <div className="absolute top-2 right-2 text-xs text-gray-600">
+          <motion.header variants={fadeInUp} transition={pageTransition} className="bg-gray-100 text-gray-800 pt-1 pb-2 px-4 border-b border-gray-200 relative shadow-sm">
+            <div className="absolute top-1 right-2 text-xs text-gray-600">
               Brought to you by{' '}
               <a
                 href="https://www.instagram.com/saad__shaikh___/"
@@ -231,24 +326,46 @@ export default function Home() {
               </a>
             </div>
             <div className="flex flex-col items-center text-center">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden flex-shrink-0 relative mb-3">
+              <div className="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full overflow-hidden flex-shrink-0 relative mb-1">
                 <Image 
                   src="/1.png" 
                   alt="ANEES Logo" 
-                  layout="fill"
-                  objectFit="cover"
+                  width={500}
+                  height={500}
+                  style={{ objectFit: 'cover' }}
                 />
               </div>
-              <div>
-                <h1 className={`text-xl md:text-2xl lg:text-3xl font-bold text-blue-600 ${roboto.className}`}>ANEES Defence Career Institute</h1>
-                <p className="text-sm md:text-base lg:text-lg text-gray-700 mt-1">Empowering young minds for a brighter future</p>
+              <div className="-mt-16"> {/* Changed from -mt-20 to -mt-16 */}
+                <h1 className={`text-2xl md:text-3xl lg:text-4xl font-bold text-blue-600 ${roboto.className}`}>ANEES Defence Career Institute</h1>
+                <p className="text-sm md:text-base lg:text-lg text-gray-700">Empowering young minds for a brighter future</p>
               </div>
+            </div>
+            <div className="absolute top-1 left-2 flex items-center">
+              {isAdminLoggedIn ? (
+                <>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-sm text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 rounded-full shadow-md"
+                  >
+                    <span className="flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Logout
+                    </span>
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => setShowAdminModal(true)} className="text-gray-600 hover:text-blue-600 transition-colors">
+                  <UserCog className="h-6 w-6" />
+                </button>
+              )}
             </div>
           </motion.header>
           
           {/* Main content */}
-          <motion.main variants={fadeInUp} transition={pageTransition} className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between mb-2 md:mb-3">
+          <motion.main variants={fadeInUp} transition={pageTransition} className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col shadow-inner mb-4"> {/* Added mb-4 here */}
+            <div className="flex items-center justify-between mb-1 md:mb-2">
               <h2 className={`text-lg md:text-xl lg:text-2xl font-semibold text-blue-600 ${roboto.className}`}>Daily Activity Calendar</h2>
               <div className="relative">
                 <input
@@ -256,7 +373,7 @@ export default function Home() {
                   placeholder="Search activities..."
                   value={searchTerm}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-8 pr-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="pl-8 pr-2 py-1 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 {searchResults.length > 0 && (
@@ -308,7 +425,7 @@ export default function Home() {
                       <ChevronRight className="h-4 w-4 text-white" />
                     </button>
                   </div>
-                  <div className="grid grid-cols-7 gap-1 flex-grow">
+                  <div className={`grid grid-cols-7 gap-1 md:gap-2 flex-grow overflow-y-auto pb-4 ${styles.customScrollbar}`}> {/* Added pb-4 and overflow-y-auto */}
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
                       <div key={day} className="text-center font-semibold text-blue-600 text-xs md:text-sm">
                         {day}
@@ -316,12 +433,12 @@ export default function Home() {
                     ))}
                     {monthDays.map((day) => {
                       const dateString = format(day, 'yyyy-MM-dd');
-                      const activity = uniqueActivities.get(dateString) as Activity | undefined;
+                      const activity = uniqueActivities.get(dateString);
                       const isSelected = isSameDay(day, selectedDate);
                       const isCurrentDay = isToday(day);
                       return (
                         <motion.div
-                          key={day.toISOString()}
+                          key={`${currentMonth.getFullYear()}-${currentMonth.getMonth()}-${day}`}
                           whileHover={{ scale: 1.05 }}
                           className={`p-1 rounded-[0.3rem] ${
                             isSameMonth(day, currentMonth) ? 'bg-gradient-to-br from-gray-100 to-gray-200' : 'bg-gray-50'
@@ -329,7 +446,7 @@ export default function Home() {
                             isSelected ? 'ring-2 ring-blue-400' : ''
                           } ${
                             isCurrentDay ? 'bg-blue-100 shadow-[0_0_10px_rgba(59,130,246,0.5)]' : ''
-                          } flex flex-col transition-all relative overflow-hidden h-full`}
+                          } flex flex-col transition-all relative overflow-hidden h-full min-h-[3rem] md:min-h-[4rem]`}
                         >
                           <button
                             onClick={() => setSelectedDate(day)}
@@ -350,6 +467,30 @@ export default function Home() {
                               </div>
                             )}
                           </button>
+                          {isAdminLoggedIn && (
+                            <div className="absolute top-0 right-0 flex md:flex-row flex-col">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditActivity(dateString);
+                                }}
+                                className="bg-blue-500 text-white text-[0.5rem] md:text-xs p-0.5 md:p-1 rounded-tl md:rounded-tr-none"
+                              >
+                                {activity ? 'E' : 'A'}
+                              </button>
+                              {activity && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteActivity(dateString);
+                                  }}
+                                  className="bg-red-500 text-white text-[0.5rem] md:text-xs p-0.5 md:p-1 rounded-tr"
+                                >
+                                  D
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </motion.div>
                       );
                     })}
@@ -362,7 +503,7 @@ export default function Home() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="w-full md:w-80 lg:w-96 bg-white/70 backdrop-blur-sm rounded-xl shadow-lg p-3 md:p-4 flex flex-col border border-gray-200 h-[180px] md:h-full"
+                  className="w-full md:w-80 lg:w-96 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-3 md:p-4 flex flex-col border border-gray-200 h-[180px] md:h-full"
                 >
                   <div className="flex items-center space-x-2 mb-3">
                     <CalendarIcon className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
@@ -370,7 +511,7 @@ export default function Home() {
                       {format(parseISO(selectedActivity.date), 'MMMM d, yyyy')}
                     </h3>
                   </div>
-                  <div className="bg-white/80 p-3 md:p-4 rounded-lg shadow-inner flex-grow overflow-y-auto">
+                  <div className="bg-white/80 p-3 md:p-4 rounded-lg shadow-md flex-grow overflow-y-auto">
                     <h4 className="text-base md:text-lg lg:text-xl font-semibold text-black mb-2 md:mb-3">{selectedActivity.name}</h4>
                     <p className="text-sm md:text-base text-black">{selectedActivity.description}</p>
                   </div>
@@ -380,7 +521,7 @@ export default function Home() {
           </motion.main>
           
           {/* Footer */}
-          <motion.footer variants={fadeInUp} transition={pageTransition} className="bg-white/80 text-gray-600 p-2 md:p-3 border-t border-gray-200">
+          <motion.footer variants={fadeInUp} transition={pageTransition} className="bg-white/80 text-gray-600 p-1 md:p-2 border-t border-gray-200 shadow-md mt-auto"> {/* Added mt-auto here */}
             <div className="text-center text-xs">
               <p>&copy; {new Date().getFullYear()} ANEES Defence Career Institute. All rights reserved.</p>
             </div>
@@ -389,7 +530,7 @@ export default function Home() {
       </motion.div>
 
       <AnimatePresence>
-        {isLoading && (
+        {(isLoading || !showContent) && (
           <motion.div
             key="loader"
             initial={{ opacity: 1 }}
@@ -414,6 +555,56 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {showAdminModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-4">Admin Login</h2>
+            <input
+              type="password"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              placeholder="Enter admin password"
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  if (adminPassword === 'admin123') { // Replace with actual secure password
+                    setIsAdminLoggedIn(true)
+                    setShowAdminModal(false)
+                    setAdminPassword('')
+                  } else {
+                    alert('Incorrect password')
+                  }
+                }}
+                className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => setShowAdminModal(false)}
+                className="bg-gray-300 text-black px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+
+function generateDefaultActivities(): Activity[] {
+  const defaultActivities: Activity[] = [];
+  for (let i = 0; i < 366; i++) {
+    const date = new Date(2024, 0, i + 1);
+    const dateString = format(date, 'yyyy-MM-dd');
+    const activity = activities[i % activities.length]; // Cycle through activities
+    defaultActivities.push({ ...activity, date: dateString });
+  }
+  return defaultActivities;
+}
+
+console.log('API function loaded');

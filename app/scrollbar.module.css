@@ -1,0 +1,25 @@
+.customScrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.customScrollbar::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+/* Optional: If you want a subtle custom scrollbar instead of completely hiding it */
+/*
+.customScrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.customScrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.customScrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+*/
+
