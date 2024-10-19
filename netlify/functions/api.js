@@ -11,7 +11,7 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
-    console.error('MongoDB URI:', process.env.MONGODB_URI);
+    console.error('MongoDB URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
   });
 
 // Define the schema outside of the main function
@@ -26,7 +26,9 @@ const Activity = mongoose.models.Activity || mongoose.model('Activity', Activity
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'https://aneesclasses-activitycalendar.netlify.app'
+}));
 
 // Create a router
 const router = express.Router();
