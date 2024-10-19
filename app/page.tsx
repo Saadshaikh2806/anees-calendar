@@ -135,7 +135,7 @@ interface Activity {
   name: string;
   description: string;
 }
-
+//----
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '/.netlify/functions/api';
 console.log('API_URL:', API_URL);
 
