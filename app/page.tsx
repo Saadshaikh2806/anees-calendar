@@ -268,7 +268,7 @@ export default function Home() {
             <div className="flex flex-col items-center text-center">
               <div className="w-32 h-32 md:w-48 md:h-48 lg:w-56 lg:h-56 rounded-full overflow-hidden flex-shrink-0 relative mb-1">
                 <Image 
-                  src="/1.png" 
+                  src="/1.webp" 
                   alt="ANEES Logo" 
                   width={500}
                   height={500}
@@ -393,7 +393,7 @@ export default function Home() {
                             onClick={() => setSelectedDate(day)}
                             className="flex flex-col h-full w-full text-left"
                           >
-                            <span className={`text-[10px] md:text-xs ${
+                            <span className={`text-xs md:text-sm ${
                               isSameMonth(day, currentMonth) ? 'text-black' : 'text-gray-400'
                             } ${
                               isSelected || isCurrentDay ? 'font-bold' : ''
@@ -402,20 +402,20 @@ export default function Home() {
                             </span>
                             {activity && (
                               <div className="mt-auto w-full">
-                                <p className="font-medium text-black text-[8px] md:text-[10px] leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
+                                <p className="font-medium text-black text-[10px] md:text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
                                   {activity.name}
                                 </p>
                               </div>
                             )}
                           </button>
                           {isAdminLoggedIn && (
-                            <div className="absolute top-0 right-0 flex flex-col md:flex-row">
+                            <div className="absolute top-0 right-0 flex flex-col sm:flex-row">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   activity ? handleEditActivity(dateString) : handleAddActivity(dateString);
                                 }}
-                                className="bg-blue-500 text-white text-[6px] md:text-[8px] p-0.5 rounded-tl md:rounded-tr-none"
+                                className="bg-blue-500 text-white text-[8px] xxs:text-[9px] xs:text-[10px] sm:text-xs md:text-sm p-0.5 xxs:p-1 sm:p-1.5 rounded-tr sm:rounded-tr-none sm:rounded-tl"
                               >
                                 {activity ? 'E' : 'A'}
                               </button>
@@ -425,7 +425,7 @@ export default function Home() {
                                     e.stopPropagation();
                                     handleDeleteActivity(dateString);
                                   }}
-                                  className="bg-red-500 text-white text-[6px] md:text-[8px] p-0.5 rounded-tr"
+                                  className="bg-red-500 text-white text-[8px] xxs:text-[9px] xs:text-[10px] sm:text-xs md:text-sm p-0.5 xxs:p-1 sm:p-1.5 rounded-tr"
                                 >
                                   D
                                 </button>
@@ -490,7 +490,7 @@ export default function Home() {
               transition={{ duration: 0.5, ease: [0.43, 0.13, 0.23, 0.96] }}
             >
               <Image 
-                src="/1.png" 
+                src="/1.webp" 
                 alt="ANEES Logo" 
                 width={250}  // Increased from 150
                 height={250} // Increased from 150
@@ -560,6 +560,8 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
+
+
 
 
 
