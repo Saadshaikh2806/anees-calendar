@@ -136,7 +136,7 @@ interface Activity {
   description: string;
 }
 
-const API_URL = '/.netlify/functions/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/.netlify/functions/api';
 console.log('API_URL:', API_URL);
 
 export default function Home() {

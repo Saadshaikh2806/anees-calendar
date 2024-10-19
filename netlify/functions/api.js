@@ -49,6 +49,7 @@ router.get('/activities', async (req, res) => {
   console.log('GET /activities route hit');
   try {
     console.log('Attempting to fetch activities from MongoDB');
+    console.log('MongoDB URI:', process.env.MONGODB_URI); // Log the MongoDB URI
     const activities = await Activity.find();
     console.log('Activities fetched successfully:', activities);
     res.json(activities);
