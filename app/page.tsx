@@ -249,7 +249,11 @@ export default function Home() {
           transition={pageTransition}
         >
           {/* Header */}
-          <motion.header variants={fadeInUp} transition={pageTransition} className="bg-gray-100 text-gray-800 pt-1 pb-2 px-2 md:px-4 border-b border-gray-200 relative shadow-sm">
+          <motion.header 
+            variants={fadeInUp} 
+            transition={pageTransition} 
+            className="bg-[#e6f7ff] text-gray-800 pt-1 pb-2 px-2 md:px-4 border-b border-gray-200 relative shadow-sm"
+          >
             <div className="absolute top-1 right-2 text-[10px] md:text-xs text-gray-600">
               Brought to you by{' '}
               <a
@@ -272,15 +276,15 @@ export default function Home() {
                 />
               </div>
               <div className="-mt-8 md:-mt-12"> 
-                <h1 className={`text-xl md:text-2xl lg:text-3xl font-bold text-green-600 ${roboto.className}`}>ANEES Defence Career Institute</h1>
-                <p className="text-xs md:text-sm lg:text-base text-gray-700">Empowering young minds for a brighter future</p>
+                <h1 className={`text-xl md:text-2xl lg:text-3xl font-bold text-blue-600 ${roboto.className}`}>ANEES Defence Career Institute</h1>
+                <p className="text-xs md:text-sm lg:text-base text-gray-600">Empowering young minds for a brighter future</p>
               </div>
             </div>
             <div className="absolute top-1 left-2 flex items-center">
               {isAdminLoggedIn ? (
                 <button
                   onClick={handleLogout}
-                  className="px-2 py-1 md:px-4 md:py-2 text-xs md:text-sm text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 rounded-full shadow-md"
+                  className="px-2 py-1 md:px-4 md:py-2 text-xs md:text-sm text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-full shadow-md"
                 >
                   <span className="flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -290,7 +294,10 @@ export default function Home() {
                   </span>
                 </button>
               ) : (
-                <button onClick={() => setShowAdminModal(true)} className="text-gray-600 hover:text-blue-600 transition-colors">
+                <button 
+                  onClick={() => setShowAdminModal(true)} 
+                  className="text-blue-600 hover:text-blue-700 transition-colors"
+                >
                   <UserCog className="h-5 w-5 md:h-6 md:w-6" />
                 </button>
               )}
@@ -300,7 +307,7 @@ export default function Home() {
           {/* Main content */}
           <motion.main variants={fadeInUp} transition={pageTransition} className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col shadow-inner mb-2 md:mb-4">
             <div className="flex items-center justify-between mb-1 md:mb-2">
-              <h2 className={`text-base md:text-lg lg:text-xl font-semibold text-green-600 ${roboto.className}`}>Daily Activity Calendar</h2>
+              <h2 className={`text-base md:text-lg lg:text-xl font-semibold text-blue-600 ${roboto.className}`}>Daily Activity Calendar</h2>
               <div className="relative">
                 <input
                   type="text"
@@ -342,11 +349,11 @@ export default function Home() {
                         setCurrentMonth(subMonths(currentMonth, 1))
                         setCalendarKey(prev => prev + 1)
                       }}
-                      className="bg-green-500 p-1.5 md:p-2 rounded-full hover:bg-green-600 transition-colors"
+                      className="bg-blue-500 p-1.5 md:p-2 rounded-full hover:bg-blue-600 transition-colors"
                     >
                       <ChevronLeft className="h-3 w-3 md:h-4 md:w-4 text-white" />
                     </button>
-                    <h3 className="text-base md:text-lg lg:text-xl font-bold text-green-600">
+                    <h3 className="text-base md:text-lg lg:text-xl font-bold text-blue-600">
                       {format(currentMonth, 'MMMM yyyy')}
                     </h3>
                     <button
@@ -354,14 +361,14 @@ export default function Home() {
                         setCurrentMonth(addMonths(currentMonth, 1))
                         setCalendarKey(prev => prev + 1)
                       }}
-                      className="bg-green-500 p-1.5 md:p-2 rounded-full hover:bg-green-600 transition-colors"
+                      className="bg-blue-500 p-1.5 md:p-2 rounded-full hover:bg-blue-600 transition-colors"
                     >
                       <ChevronRight className="h-3 w-3 md:h-4 md:w-4 text-white" />
                     </button>
                   </div>
                   <div className={`grid grid-cols-7 gap-1 md:gap-2 flex-grow overflow-y-auto pb-2 md:pb-4 ${styles.customScrollbar}`}>
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                      <div key={day} className="text-center font-semibold text-green-600 text-xs md:text-sm lg:text-base p-1 md:p-2">
+                      <div key={day} className="text-center font-semibold text-blue-600 text-xs md:text-sm lg:text-base p-1 md:p-2">
                         {day}
                       </div>
                     ))}
@@ -377,9 +384,9 @@ export default function Home() {
                           className={`p-0.5 md:p-1 m-0.5 md:m-1 rounded-[0.3rem] ${
                             isSameMonth(day, currentMonth) ? 'bg-gradient-to-br from-gray-100 to-gray-200' : 'bg-gray-50'
                           } ${
-                            isSelected ? 'ring-2 ring-green-400' : ''
+                            isSelected ? 'ring-2 ring-blue-400' : ''
                           } ${
-                            isCurrentDay ? 'bg-green-100 shadow-[0_0_10px_rgba(74,222,128,0.5)]' : ''
+                            isCurrentDay ? 'bg-blue-100 shadow-[0_0_10px_rgba(59,130,246,0.5)]' : ''
                           } flex flex-col transition-all relative overflow-hidden h-full min-h-[2.5rem] md:min-h-[3.5rem]`}
                         >
                           <button
@@ -408,7 +415,7 @@ export default function Home() {
                                   e.stopPropagation();
                                   activity ? handleEditActivity(dateString) : handleAddActivity(dateString);
                                 }}
-                                className="bg-green-500 text-white text-[6px] md:text-[8px] p-0.5 rounded-tl md:rounded-tr-none"
+                                className="bg-blue-500 text-white text-[6px] md:text-[8px] p-0.5 rounded-tl md:rounded-tr-none"
                               >
                                 {activity ? 'E' : 'A'}
                               </button>
@@ -440,7 +447,7 @@ export default function Home() {
                   className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-full"
                 >
                   <div className="flex items-center space-x-2 mb-2">
-                    <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-green-400" />
+                    <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-blue-400" />
                     <h3 className="text-sm md:text-base lg:text-lg font-semibold text-black">
                       {format(parseISO(selectedActivity.date), 'MMMM d, yyyy')}
                     </h3>
@@ -516,7 +523,7 @@ export default function Home() {
                     alert('Incorrect password')
                   }
                 }}
-                className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+                className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
               >
                 Login
               </button>
@@ -553,6 +560,16 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
+
+
+
+
+
+
+
+
+
+
 
 
 
