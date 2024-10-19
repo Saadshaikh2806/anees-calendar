@@ -131,12 +131,12 @@ const pageTransition = {
 }
 
 interface Activity {
+  date: string;
   name: string;
   description: string;
-  date: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8888/.netlify/functions/api';
+const API_URL = '/.netlify/functions/api';
 console.log('API_URL:', API_URL);
 
 export default function Home() {
@@ -171,21 +171,22 @@ export default function Home() {
 
   useEffect(() => {
     setIsLoading(true);
+    console.log('Fetching activities from:', `${API_URL}/activities`);
     axios.get(`${API_URL}/activities`)
       .then(response => {
         console.log('Fetched activities:', response.data);
         if (response.data.length === 0) {
-          // If no activities in API, initialize with default activities
+          console.log('No activities found, initializing default activities');
           const defaultActivities = generateDefaultActivities();
           axios.post(`${API_URL}/activities/initialize`, defaultActivities)
             .then(() => {
-              const activityMap = new Map(defaultActivities.map(a => [a.date, a]));
-              setUniqueActivities(activityMap);
+              console.log('Default activities initialized');
+              setUniqueActivities(new Map(defaultActivities.map(a => [a.date, a])));
               setActivities(defaultActivities);
             })
             .catch(error => console.error('Error initializing activities:', error));
         } else {
-          // If activities exist, use them
+          console.log('Setting activities from API response');
           const activityMap = new Map(
             response.data.map((a: Activity) => [a.date, a])
           ) as Map<string, Activity>;
@@ -248,7 +249,7 @@ export default function Home() {
           setUniqueActivities(prevActivities => {
             const newActivities = new Map(prevActivities);
             newActivities.set(date, updatedActivity);
-            return newActivities;
+            return newActivities as Map<string, Activity>;
           });
           setActivities(prevActivities => 
             prevActivities.map(a => a.date === date ? updatedActivity : a)
@@ -270,7 +271,7 @@ export default function Home() {
           setUniqueActivities(prevActivities => {
             const newActivities = new Map(prevActivities);
             newActivities.delete(date);
-            return newActivities;
+            return newActivities as Map<string, Activity>;
           });
           setActivities(prevActivities => prevActivities.filter(a => a.date !== date));
           setCalendarKey(prevKey => prevKey + 1);
@@ -425,7 +426,7 @@ export default function Home() {
                       <ChevronRight className="h-4 w-4 text-white" />
                     </button>
                   </div>
-                  <div className={`grid grid-cols-7 gap-1 md:gap-2 flex-grow overflow-y-auto pb-4 ${styles.customScrollbar}`}> {/* Added pb-4 and overflow-y-auto */}
+                  <div className={`grid grid-cols-7 gap-1 md:gap-2 flex-grow overflow-y-auto pb-4 ${styles.customScrollbar}`}>
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
                       <div key={day} className="text-center font-semibold text-blue-600 text-xs md:text-sm">
                         {day}
@@ -434,6 +435,7 @@ export default function Home() {
                     {monthDays.map((day) => {
                       const dateString = format(day, 'yyyy-MM-dd');
                       const activity = uniqueActivities.get(dateString);
+                      console.log(`Date: ${dateString}, Activity:`, activity);
                       const isSelected = isSameDay(day, selectedDate);
                       const isCurrentDay = isToday(day);
                       return (
@@ -598,10 +600,17 @@ export default function Home() {
 
 function generateDefaultActivities(): Activity[] {
   const defaultActivities: Activity[] = [];
+  const activities = [
+    { name: 'Read a book', description: 'Spend 30 minutes reading' },
+    { name: 'Exercise', description: '30 minutes of physical activity' },
+    { name: 'Learn something new', description: 'Study a new topic for 1 hour' },
+    // Add more default activities as needed
+  ];
+
   for (let i = 0; i < 366; i++) {
     const date = new Date(2024, 0, i + 1);
     const dateString = format(date, 'yyyy-MM-dd');
-    const activity = activities[i % activities.length]; // Cycle through activities
+    const activity = activities[i % activities.length];
     defaultActivities.push({ ...activity, date: dateString });
   }
   return defaultActivities;
