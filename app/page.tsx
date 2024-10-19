@@ -310,26 +310,26 @@ export default function Home() {
           {/* Main content */}
           <motion.main variants={fadeInUp} transition={pageTransition} className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col shadow-inner mb-2 md:mb-4">
             <div className="flex items-center justify-between mb-1 md:mb-2">
-              <h2 className={`text-base md:text-lg lg:text-xl font-semibold text-blue-600 ${roboto.className}`}>Daily Activity Calendar</h2>
-              <div className="relative">
+              <h2 className={`text-lg md:text-xl lg:text-2xl font-semibold text-blue-600 ${roboto.className}`}>Daily Activity Calendar</h2>
+              <div className="relative w-full md:w-64 lg:w-80">
                 <input
                   type="text"
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-7 pr-2 py-1 border border-gray-300 rounded-full text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-24 md:w-auto"
+                  className="pl-7 pr-2 py-1 md:py-1.5 border border-gray-300 rounded-full text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                 />
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-gray-400" />
                 {searchResults.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     {searchResults.map((result, index) => (
                       <div 
                         key={index} 
-                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        className="p-2 md:p-3 hover:bg-gray-100 cursor-pointer"
                         onClick={() => handleSearchResultClick(result)}
                       >
-                        <p className="font-semibold">{result.name}</p>
-                        <p className="text-sm text-gray-600">{format(parseISO(result.date), 'MMMM d, yyyy')}</p>
+                        <p className="font-semibold text-xs md:text-sm">{result.name}</p>
+                        <p className="text-[10px] md:text-xs text-gray-600">{format(parseISO(result.date), 'MMMM d, yyyy')}</p>
                       </div>
                     ))}
                   </div>
