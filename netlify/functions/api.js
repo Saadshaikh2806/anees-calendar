@@ -37,15 +37,25 @@ if (!Activity) {
   Activity = mongoose.models.Activity || mongoose.model('Activity', ActivitySchema);
 }
 
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.once('open', () => {
+  console.log('MongoDB connected successfully');
+});
+
 router.get('/activities', async (req, res) => {
   console.log('GET /activities route hit');
   try {
+    console.log('Attempting to fetch activities from MongoDB');
     const activities = await Activity.find();
-    console.log('Activities fetched:', activities);
+    console.log('Activities fetched successfully:', activities);
     res.json(activities);
   } catch (error) {
     console.error('Error fetching activities:', error);
-    res.status(500).json({ message: 'Error fetching activities', error: error.message });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ message: 'Error fetching activities', error: error.message, stack: error.stack });
   }
 });
 

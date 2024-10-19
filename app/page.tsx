@@ -198,6 +198,9 @@ export default function Home() {
       })
       .catch(error => {
         console.error('Error fetching activities:', error);
+        if (error.response) {
+          console.error('Error response:', error.response.data);
+        }
         setIsLoading(false);
       });
   }, [API_URL]);
