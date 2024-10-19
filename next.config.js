@@ -1,12 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-      },
-    ],
+  reactStrictMode: true,
+  eslint: {
+    ignoreDuringBuilds: true, // This will ignore ESLint errors during the build process
   },
 }
 

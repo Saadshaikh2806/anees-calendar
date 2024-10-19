@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build ",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "start:server": "ts-node backend/server.ts"
@@ -37,10 +37,15 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^8.10.0",
+    "@typescript-eslint/parser": "^8.10.0",
     "eslint": "^8",
-    "eslint-config-next": "14.2.15",
+    "eslint-config-next": "^14.2.15",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "eslintConfig": {
+    "extends": "next"
   }
 }
