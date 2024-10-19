@@ -4,7 +4,11 @@ const serverless = require('serverless-http');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*', // Be more specific in production
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 const router = express.Router();
@@ -16,8 +20,11 @@ mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+.then(() => console.log('Connected to MongoDB successfully'))
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  console.error('MongoDB URI:', process.env.MONGODB_URI);
+});
 
 // Define the Activity model only if it hasn't been defined yet
 if (!Activity) {
