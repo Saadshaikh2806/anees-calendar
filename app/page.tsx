@@ -203,7 +203,7 @@ export default function Home() {
         }
         setIsLoading(false);
       });
-  }, [API_URL]);
+  }, []); // Empty dependency array
 
   useEffect(() => {
     console.log('Current activities:', activities);

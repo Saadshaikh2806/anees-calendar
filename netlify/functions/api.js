@@ -4,11 +4,7 @@ const serverless = require('serverless-http');
 const cors = require('cors');
 
 const app = express();
-app.use(cors({
-  origin: '*', // Be more specific in production
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 const router = express.Router();
