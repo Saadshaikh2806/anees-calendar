@@ -244,7 +244,7 @@ export default function Home() {
         className="flex-grow relative overflow-hidden flex flex-col"
       >
         <motion.div 
-          className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.1)] overflow-hidden relative z-10 flex flex-col flex-grow"
+          className="w-full max-w-6xl mx-auto bg-white rounded-xl overflow-hidden relative z-10 flex flex-col flex-grow"
           variants={fadeInUp}
           transition={pageTransition}
         >
@@ -252,7 +252,7 @@ export default function Home() {
           <motion.header 
             variants={fadeInUp} 
             transition={pageTransition} 
-            className="bg-[#e6f7ff] text-gray-800 pt-1 pb-2 px-2 md:px-4 border-b border-gray-200 relative shadow-sm"
+            className="bg-[#e6f7ff] text-gray-800 pt-1 pb-2 px-2 md:px-4 border-b border-gray-200 relative rounded-t-xl"
           >
             <div className="absolute top-1 right-2 text-[10px] md:text-xs text-gray-600">
               Brought to you by{' '}
@@ -276,7 +276,7 @@ export default function Home() {
                 />
               </div>
               <div className="-mt-8 md:-mt-12"> 
-                <h1 className={`text-xl md:text-2xl lg:text-3xl font-bold text-blue-600 ${roboto.className}`}>ANEES Defence Career Institute</h1>
+                <h1 className={`text-xl md:text-2xl lg:text-3xl font-bold text-black ${roboto.className}`}>ANEES Defence Career Institute</h1>
                 <p className="text-xs md:text-sm lg:text-base text-gray-600">Empowering young minds for a brighter future</p>
               </div>
             </div>
@@ -284,10 +284,10 @@ export default function Home() {
               {isAdminLoggedIn ? (
                 <button
                   onClick={handleLogout}
-                  className="px-2 py-1 md:px-4 md:py-2 text-xs md:text-sm text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-full shadow-md"
+                  className="px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-full shadow-md"
                 >
                   <span className="flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6 mr-1 md:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                     Logout
@@ -296,9 +296,9 @@ export default function Home() {
               ) : (
                 <button 
                   onClick={() => setShowAdminModal(true)} 
-                  className="text-blue-600 hover:text-blue-700 transition-colors"
+                  className="text-blue-600 hover:text-blue-700 transition-colors p-1.5 md:p-2"
                 >
-                  <UserCog className="h-5 w-5 md:h-6 md:w-6" />
+                  <UserCog className="h-6 w-6 md:h-7 md:w-7" />
                 </button>
               )}
             </div>
@@ -386,7 +386,7 @@ export default function Home() {
                           } ${
                             isSelected ? 'ring-2 ring-blue-400' : ''
                           } ${
-                            isCurrentDay ? 'bg-blue-100 shadow-[0_0_10px_rgba(59,130,246,0.5)]' : ''
+                            isCurrentDay ? 'bg-blue-100' : ''
                           } flex flex-col transition-all relative overflow-hidden h-full min-h-[2.5rem] md:min-h-[3.5rem]`}
                         >
                           <button
@@ -444,7 +444,7 @@ export default function Home() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-full"
+                  className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-full mb-4 md:mb-6"
                 >
                   <div className="flex items-center space-x-2 mb-2">
                     <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-blue-400" />
@@ -452,13 +452,13 @@ export default function Home() {
                       {format(parseISO(selectedActivity.date), 'MMMM d, yyyy')}
                     </h3>
                   </div>
-                  <div className="bg-white/80 p-2 md:p-3 rounded-lg shadow-md flex-grow overflow-y-auto">
+                  <div className="bg-blue-100 p-2 md:p-3 rounded-xl shadow-md flex-grow overflow-y-auto mb-2 md:mb-3">
                     <h4 className="text-sm md:text-base lg:text-lg font-semibold text-black mb-1 md:mb-2">{selectedActivity.name}</h4>
                     <p className="text-xs md:text-sm text-black">{selectedActivity.description}</p>
                   </div>
                 </motion.div>
               ) : (
-                <div className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-full justify-center items-center">
+                <div className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-full justify-center items-center mb-4 md:mb-6">
                   <p className="text-gray-500 text-sm">No activity selected</p>
                 </div>
               )}
@@ -466,7 +466,7 @@ export default function Home() {
           </motion.main>
           
           {/* Footer */}
-          <motion.footer variants={fadeInUp} transition={pageTransition} className="bg-white/80 text-gray-600 p-1 border-t border-gray-200 shadow-md mt-auto">
+          <motion.footer variants={fadeInUp} transition={pageTransition} className="bg-white/80 text-gray-600 p-1 border-t border-gray-200 mt-auto rounded-b-xl">
             <div className="text-center text-[10px] md:text-xs">
               <p>&copy; {new Date().getFullYear()} ANEES Defence Career Institute. All rights reserved.</p>
             </div>
