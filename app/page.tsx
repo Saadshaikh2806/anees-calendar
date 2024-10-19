@@ -409,6 +409,7 @@ export default function Home() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                                   activity ? handleEditActivity(dateString) : handleAddActivity(dateString);
                                 }}
                                 className="bg-blue-500 text-white text-[0.5rem] md:text-xs p-0.5 md:p-1 rounded-tl md:rounded-tr-none"
@@ -556,6 +557,8 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
+
+
 
 
 
