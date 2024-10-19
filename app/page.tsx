@@ -170,6 +170,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    console.log('Fetching activities from:', API_URL);
     setIsLoading(true);
     console.log('Fetching activities from:', `${API_URL}/activities`);
     axios.get(`${API_URL}/activities`)
