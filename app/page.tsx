@@ -233,7 +233,7 @@ export default function Home() {
   console.log('isAdminLoggedIn:', isAdminLoggedIn);
 
   return (
-    <div className={`h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 ${inter.className}`}>
+    <div className={`min-h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 ${inter.className}`}>
       <motion.div
         initial={{ filter: "blur(10px)", opacity: 0.3 }}
         animate={{ 
@@ -249,8 +249,8 @@ export default function Home() {
           transition={pageTransition}
         >
           {/* Header */}
-          <motion.header variants={fadeInUp} transition={pageTransition} className="bg-gray-100 text-gray-800 pt-1 pb-2 px-4 border-b border-gray-200 relative shadow-sm">
-            <div className="absolute top-1 right-2 text-xs text-gray-600">
+          <motion.header variants={fadeInUp} transition={pageTransition} className="bg-gray-100 text-gray-800 pt-1 pb-2 px-2 md:px-4 border-b border-gray-200 relative shadow-sm">
+            <div className="absolute top-1 right-2 text-[10px] md:text-xs text-gray-600">
               Brought to you by{' '}
               <a
                 href="https://www.instagram.com/saad__shaikh___/"
@@ -262,7 +262,7 @@ export default function Home() {
               </a>
             </div>
             <div className="flex flex-col items-center text-center">
-              <div className="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full overflow-hidden flex-shrink-0 relative mb-1">
+              <div className="w-32 h-32 md:w-48 md:h-48 lg:w-56 lg:h-56 rounded-full overflow-hidden flex-shrink-0 relative mb-1">
                 <Image 
                   src="/1.png" 
                   alt="ANEES Logo" 
@@ -271,47 +271,45 @@ export default function Home() {
                   style={{ objectFit: 'cover' }}
                 />
               </div>
-              <div className="-mt-16"> {/* Changed from -mt-20 to -mt-16 */}
-                <h1 className={`text-2xl md:text-3xl lg:text-4xl font-bold text-blue-600 ${roboto.className}`}>ANEES Defence Career Institute</h1>
-                <p className="text-sm md:text-base lg:text-lg text-gray-700">Empowering young minds for a brighter future</p>
+              <div className="-mt-8 md:-mt-12"> 
+                <h1 className={`text-xl md:text-2xl lg:text-3xl font-bold text-blue-600 ${roboto.className}`}>ANEES Defence Career Institute</h1>
+                <p className="text-xs md:text-sm lg:text-base text-gray-700">Empowering young minds for a brighter future</p>
               </div>
             </div>
             <div className="absolute top-1 left-2 flex items-center">
               {isAdminLoggedIn ? (
-                <>
-                  <button
-                    onClick={handleLogout}
-                    className="px-4 py-2 text-sm text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 rounded-full shadow-md"
-                  >
-                    <span className="flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                      Logout
-                    </span>
-                  </button>
-                </>
+                <button
+                  onClick={handleLogout}
+                  className="px-2 py-1 md:px-4 md:py-2 text-xs md:text-sm text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 rounded-full shadow-md"
+                >
+                  <span className="flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                  </span>
+                </button>
               ) : (
                 <button onClick={() => setShowAdminModal(true)} className="text-gray-600 hover:text-blue-600 transition-colors">
-                  <UserCog className="h-6 w-6" />
+                  <UserCog className="h-5 w-5 md:h-6 md:w-6" />
                 </button>
               )}
             </div>
           </motion.header>
           
           {/* Main content */}
-          <motion.main variants={fadeInUp} transition={pageTransition} className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col shadow-inner mb-4"> {/* Added mb-4 here */}
+          <motion.main variants={fadeInUp} transition={pageTransition} className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col shadow-inner mb-2 md:mb-4">
             <div className="flex items-center justify-between mb-1 md:mb-2">
-              <h2 className={`text-lg md:text-xl lg:text-2xl font-semibold text-blue-600 ${roboto.className}`}>Daily Activity Calendar</h2>
+              <h2 className={`text-base md:text-lg lg:text-xl font-semibold text-blue-600 ${roboto.className}`}>Daily Activity Calendar</h2>
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search activities..."
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-8 pr-2 py-1 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="pl-7 pr-2 py-1 border border-gray-300 rounded-full text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-24 md:w-auto"
                 />
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 md:h-4 md:w-4 text-gray-400" />
                 {searchResults.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
                     {searchResults.map((result, index) => (
@@ -336,19 +334,19 @@ export default function Home() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3 }}
-                  className="flex-grow bg-white rounded-xl shadow-md p-2 md:p-3 mb-3 md:mb-0 border border-gray-200 overflow-hidden flex flex-col"
+                  className="flex-grow bg-white rounded-xl shadow-md p-1 md:p-2 mb-2 md:mb-0 border border-gray-200 overflow-hidden flex flex-col"
                 >
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2 md:mb-4">
                     <button
                       onClick={() => {
                         setCurrentMonth(subMonths(currentMonth, 1))
                         setCalendarKey(prev => prev + 1)
                       }}
-                      className="bg-blue-500 p-1 rounded-full hover:bg-blue-600 transition-colors"
+                      className="bg-blue-500 p-1.5 md:p-2 rounded-full hover:bg-blue-600 transition-colors"
                     >
-                      <ChevronLeft className="h-4 w-4 text-white" />
+                      <ChevronLeft className="h-3 w-3 md:h-4 md:w-4 text-white" />
                     </button>
-                    <h3 className="text-sm md:text-base lg:text-lg font-bold text-blue-600">
+                    <h3 className="text-base md:text-lg lg:text-xl font-bold text-blue-600">
                       {format(currentMonth, 'MMMM yyyy')}
                     </h3>
                     <button
@@ -356,40 +354,39 @@ export default function Home() {
                         setCurrentMonth(addMonths(currentMonth, 1))
                         setCalendarKey(prev => prev + 1)
                       }}
-                      className="bg-blue-500 p-1 rounded-full hover:bg-blue-600 transition-colors"
+                      className="bg-blue-500 p-1.5 md:p-2 rounded-full hover:bg-blue-600 transition-colors"
                     >
-                      <ChevronRight className="h-4 w-4 text-white" />
+                      <ChevronRight className="h-3 w-3 md:h-4 md:w-4 text-white" />
                     </button>
                   </div>
-                  <div className={`grid grid-cols-7 gap-1 md:gap-2 flex-grow overflow-y-auto pb-4 ${styles.customScrollbar}`}>
+                  <div className={`grid grid-cols-7 gap-1 md:gap-2 flex-grow overflow-y-auto pb-2 md:pb-4 ${styles.customScrollbar}`}>
                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                      <div key={day} className="text-center font-semibold text-blue-600 text-xs md:text-sm">
+                      <div key={day} className="text-center font-semibold text-blue-600 text-xs md:text-sm lg:text-base p-1 md:p-2">
                         {day}
                       </div>
                     ))}
                     {monthDays.map((day) => {
                       const dateString = format(day, 'yyyy-MM-dd');
                       const activity = uniqueActivities.get(dateString);
-                      console.log(`Date: ${dateString}, Activity:`, activity);
                       const isSelected = isSameDay(day, selectedDate);
                       const isCurrentDay = isToday(day);
                       return (
                         <motion.div
                           key={`${currentMonth.getFullYear()}-${currentMonth.getMonth()}-${day}`}
                           whileHover={{ scale: 1.05 }}
-                          className={`p-1 rounded-[0.3rem] ${
+                          className={`p-0.5 md:p-1 m-0.5 md:m-1 rounded-[0.3rem] ${
                             isSameMonth(day, currentMonth) ? 'bg-gradient-to-br from-gray-100 to-gray-200' : 'bg-gray-50'
                           } ${
                             isSelected ? 'ring-2 ring-blue-400' : ''
                           } ${
                             isCurrentDay ? 'bg-blue-100 shadow-[0_0_10px_rgba(59,130,246,0.5)]' : ''
-                          } flex flex-col transition-all relative overflow-hidden h-full min-h-[3rem] md:min-h-[4rem]`}
+                          } flex flex-col transition-all relative overflow-hidden h-full min-h-[2.5rem] md:min-h-[3.5rem]`}
                         >
                           <button
                             onClick={() => setSelectedDate(day)}
                             className="flex flex-col h-full w-full text-left"
                           >
-                            <span className={`text-xs md:text-sm ${
+                            <span className={`text-[10px] md:text-xs ${
                               isSameMonth(day, currentMonth) ? 'text-black' : 'text-gray-400'
                             } ${
                               isSelected || isCurrentDay ? 'font-bold' : ''
@@ -398,21 +395,20 @@ export default function Home() {
                             </span>
                             {activity && (
                               <div className="mt-auto w-full">
-                                <p className="font-medium text-black text-[0.6rem] md:text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
+                                <p className="font-medium text-black text-[8px] md:text-[10px] leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
                                   {activity.name}
                                 </p>
                               </div>
                             )}
                           </button>
                           {isAdminLoggedIn && (
-                            <div className="absolute top-0 right-0 flex md:flex-row flex-col">
+                            <div className="absolute top-0 right-0 flex flex-col md:flex-row">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                                   activity ? handleEditActivity(dateString) : handleAddActivity(dateString);
                                 }}
-                                className="bg-blue-500 text-white text-[0.5rem] md:text-xs p-0.5 md:p-1 rounded-tl md:rounded-tr-none"
+                                className="bg-blue-500 text-white text-[6px] md:text-[8px] p-0.5 rounded-tl md:rounded-tr-none"
                               >
                                 {activity ? 'E' : 'A'}
                               </button>
@@ -422,7 +418,7 @@ export default function Home() {
                                     e.stopPropagation();
                                     handleDeleteActivity(dateString);
                                   }}
-                                  className="bg-red-500 text-white text-[0.5rem] md:text-xs p-0.5 md:p-1 rounded-tr"
+                                  className="bg-red-500 text-white text-[6px] md:text-[8px] p-0.5 rounded-tr"
                                 >
                                   D
                                 </button>
@@ -441,30 +437,30 @@ export default function Home() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="w-full md:w-80 lg:w-96 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-3 md:p-4 flex flex-col border border-gray-200 h-[180px] md:h-full"
+                  className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-full"
                 >
-                  <div className="flex items-center space-x-2 mb-3">
-                    <CalendarIcon className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
-                    <h3 className="text-base md:text-lg lg:text-xl font-semibold text-black">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-blue-400" />
+                    <h3 className="text-sm md:text-base lg:text-lg font-semibold text-black">
                       {format(parseISO(selectedActivity.date), 'MMMM d, yyyy')}
                     </h3>
                   </div>
-                  <div className="bg-white/80 p-3 md:p-4 rounded-lg shadow-md flex-grow overflow-y-auto">
-                    <h4 className="text-base md:text-lg lg:text-xl font-semibold text-black mb-2 md:mb-3">{selectedActivity.name}</h4>
-                    <p className="text-sm md:text-base text-black">{selectedActivity.description}</p>
+                  <div className="bg-white/80 p-2 md:p-3 rounded-lg shadow-md flex-grow overflow-y-auto">
+                    <h4 className="text-sm md:text-base lg:text-lg font-semibold text-black mb-1 md:mb-2">{selectedActivity.name}</h4>
+                    <p className="text-xs md:text-sm text-black">{selectedActivity.description}</p>
                   </div>
                 </motion.div>
               ) : (
-                <div className="w-full md:w-80 lg:w-96 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-3 md:p-4 flex flex-col border border-gray-200 h-[180px] md:h-full justify-center items-center">
-                  <p className="text-gray-500">No activity selected</p>
+                <div className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-full justify-center items-center">
+                  <p className="text-gray-500 text-sm">No activity selected</p>
                 </div>
               )}
             </div>
           </motion.main>
           
           {/* Footer */}
-          <motion.footer variants={fadeInUp} transition={pageTransition} className="bg-white/80 text-gray-600 p-1 md:p-2 border-t border-gray-200 shadow-md mt-auto"> {/* Added mt-auto here */}
-            <div className="text-center text-xs">
+          <motion.footer variants={fadeInUp} transition={pageTransition} className="bg-white/80 text-gray-600 p-1 border-t border-gray-200 shadow-md mt-auto">
+            <div className="text-center text-[10px] md:text-xs">
               <p>&copy; {new Date().getFullYear()} ANEES Defence Career Institute. All rights reserved.</p>
             </div>
           </motion.footer>
@@ -557,6 +553,12 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
+
+
+
+
+
+
 
 
 
