@@ -16,7 +16,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
   });
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 const router = express.Router();
@@ -25,6 +25,8 @@ const router = express.Router();
 router.get('/activities', async (req, res) => {
   console.log('GET /activities route hit');
   try {
+    console.log('Attempting to fetch activities from MongoDB');
+    console.log('MongoDB URI:', process.env.MONGODB_URI); // Log the MongoDB URI
     const activities = await Activity.find();
     res.json(activities);
   } catch (error) {
