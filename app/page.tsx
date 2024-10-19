@@ -252,7 +252,7 @@ export default function Home() {
           <motion.header 
             variants={fadeInUp} 
             transition={pageTransition} 
-            className="bg-[#e6f7ff] text-gray-800 pt-1 pb-2 px-2 md:px-4 border-b border-gray-200 relative rounded-t-xl"
+            className="bg-blue-100 text-gray-800 pt-1 pb-2 px-2 md:px-4 border-b border-gray-200 relative rounded-t-xl"
           >
             <div className="absolute top-1 right-2 text-[10px] md:text-xs text-gray-600">
               Brought to you by{' '}
