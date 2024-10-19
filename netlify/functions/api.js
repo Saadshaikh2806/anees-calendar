@@ -81,3 +81,15 @@ app.use('/.netlify/functions/api', router);
 module.exports.handler = serverless(app);
 
 const API_URL = '/.netlify/functions/api';
+
+const handler = async (event, context) => {
+  try {
+    // Your existing code here
+  } catch (error) {
+    console.error('Function error:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: error.message, stack: error.stack }),
+    };
+  }
+};
