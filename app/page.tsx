@@ -296,9 +296,12 @@ export default function Home() {
               ) : (
                 <button 
                   onClick={() => setShowAdminModal(true)} 
-                  className="text-blue-600 hover:text-blue-700 transition-colors p-1.5 md:p-2"
+                  className="px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-full shadow-md"
                 >
-                  <UserCog className="h-6 w-6 md:h-7 md:w-7" />
+                  <span className="flex items-center justify-center">
+                    <UserCog className="h-5 w-5 md:h-6 md:w-6 mr-1 md:mr-2" />
+                    Admin
+                  </span>
                 </button>
               )}
             </div>
@@ -503,14 +506,14 @@ export default function Home() {
 
       {showAdminModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">Admin Login</h2>
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80 max-w-[90%]">
+            <h2 className="text-xl font-bold mb-4 text-black">Admin Login</h2>
             <input
               type="password"
               value={adminPassword}
               onChange={(e) => setAdminPassword(e.target.value)}
               placeholder="Enter admin password"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
+              className="w-full p-2 border border-gray-300 rounded mb-4 text-black"
             />
             <div className="flex justify-end">
               <button
@@ -523,13 +526,13 @@ export default function Home() {
                     alert('Incorrect password')
                   }
                 }}
-                className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                className="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition-colors"
               >
                 Login
               </button>
               <button
                 onClick={() => setShowAdminModal(false)}
-                className="bg-gray-300 text-black px-4 py-2 rounded"
+                className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition-colors"
               >
                 Cancel
               </button>
