@@ -237,23 +237,57 @@ export default function Home() {
     setSearchResults([])
   }
 
-  const handleEditActivity = (date: string) => {
-    const activity = uniqueActivities.get(date);
-    const newName = prompt('Enter new activity name:', activity?.name);
-    const newDescription = prompt('Enter new activity description:', activity?.description);
+  const handleAddActivity = (date: string) => {
+    const newName = prompt('Enter activity name:');
+    const newDescription = prompt('Enter activity description:');
 
     if (newName && newDescription) {
-      axios.put(`${API_URL}/activities/${date}`, { name: newName, description: newDescription })
+      const newActivity: Activity = {
+        date,
+        name: newName,
+        description: newDescription
+      };
+
+      axios.post(`${API_URL}/activities`, newActivity)
         .then(response => {
-          console.log('Activity updated:', response.data);
-          const updatedActivity: Activity = response.data;
+          console.log('Activity added:', response.data);
           setUniqueActivities(prevActivities => {
             const newActivities = new Map(prevActivities);
-            newActivities.set(date, updatedActivity);
-            return newActivities as Map<string, Activity>;
+            newActivities.set(date, response.data);
+            return newActivities;
+          });
+          setActivities(prevActivities => [...prevActivities, response.data]);
+          setCalendarKey(prevKey => prevKey + 1);
+        })
+        .catch(error => {
+          console.error('Error adding activity:', error);
+          alert('Failed to add activity. Please try again.');
+        });
+    }
+  };
+
+  const handleEditActivity = (date: string) => {
+    const activity = uniqueActivities.get(date);
+    const newName = prompt('Enter new activity name:', activity?.name || '');
+    const newDescription = prompt('Enter new activity description:', activity?.description || '');
+
+    if (newName && newDescription) {
+      const updatedActivity: Activity = {
+        date,
+        name: newName,
+        description: newDescription
+      };
+
+      axios.put(`${API_URL}/activities/${date}`, updatedActivity)
+        .then(response => {
+          console.log('Activity updated:', response.data);
+          setUniqueActivities(prevActivities => {
+            const newActivities = new Map(prevActivities);
+            newActivities.set(date, response.data);
+            return newActivities;
           });
           setActivities(prevActivities => 
-            prevActivities.map(a => a.date === date ? updatedActivity : a)
+            prevActivities.map(a => a.date === date ? response.data : a)
           );
           setCalendarKey(prevKey => prevKey + 1);
         })
@@ -475,7 +509,7 @@ export default function Home() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleEditActivity(dateString);
+                                  activity ? handleEditActivity(dateString) : handleAddActivity(dateString);
                                 }}
                                 className="bg-blue-500 text-white text-[0.5rem] md:text-xs p-0.5 md:p-1 rounded-tl md:rounded-tr-none"
                               >
@@ -501,7 +535,7 @@ export default function Home() {
                 </motion.div>
               </AnimatePresence>
               
-              {selectedActivity && (
+              {selectedActivity ? (
                 <motion.div 
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -519,6 +553,10 @@ export default function Home() {
                     <p className="text-sm md:text-base text-black">{selectedActivity.description}</p>
                   </div>
                 </motion.div>
+              ) : (
+                <div className="w-full md:w-80 lg:w-96 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-3 md:p-4 flex flex-col border border-gray-200 h-[180px] md:h-full justify-center items-center">
+                  <p className="text-gray-500">No activity selected</p>
+                </div>
               )}
             </div>
           </motion.main>
