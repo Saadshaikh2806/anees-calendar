@@ -5,27 +5,30 @@ import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterv
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Search, UserCog } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { Inter, Roboto } from 'next/font/google'
+import { Inter, Roboto, Poppins } from 'next/font/google'
 import axios from 'axios';
 import styles from './scrollbar.module.css';
+import ToggleSwitch from '@/components/ToggleSwitch';
 
 const inter = Inter({ subsets: ['latin'] })
 const roboto = Roboto({ weight: ['400', '500', '700'], subsets: ['latin'] })
+const poppins = Poppins({ weight: ['400', '600'], subsets: ['latin'] })
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 20, filter: "blur(10px)" },
-  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-  exit: { opacity: 0, y: -20, filter: "blur(10px)" },
-  transition: { duration: 0.5, ease: [0.43, 0.13, 0.23, 0.96] }
-}
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
 
-
+const fadeInDown = {
+  hidden: { opacity: 0, y: -20 },
+  visible: { opacity: 1, y: 0 }
+};
 
 const pageTransition = {
-  type: "tween",
-  ease: "anticipate",
+  type: 'tween',
+  ease: 'anticipate',
   duration: 0.5
-}
+};
 
 interface Activity {
   date: string;
@@ -52,11 +55,16 @@ export default function Home() {
   const [uniqueActivities, setUniqueActivities] = useState<Map<string, Activity>>(new Map());
   const [activities, setActivities] = useState<Activity[]>([]);
 
+  const [showAcademicsCalendar, setShowAcademicsCalendar] = useState(false);
+  const [academicActivities, setAcademicActivities] = useState<Activity[]>([]);
+
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
   const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
 
-  const selectedActivity = uniqueActivities.get(format(selectedDate, 'yyyy-MM-dd'))
+  const selectedActivity = showAcademicsCalendar
+    ? academicActivities.find(a => a.date === format(selectedDate, 'yyyy-MM-dd'))
+    : uniqueActivities.get(format(selectedDate, 'yyyy-MM-dd'));
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -67,40 +75,29 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    console.log('Fetching activities from:', API_URL);
+    console.log('Fetching activities');
     setIsLoading(true);
-    console.log('Fetching activities from:', `${API_URL}/activities`);
-    axios.get(`${API_URL}/activities`)
-      .then(response => {
-        console.log('Fetched activities:', response.data);
-        if (response.data.length === 0) {
-          console.log('No activities found, initializing default activities');
-          const defaultActivities = generateDefaultActivities();
-          axios.post(`${API_URL}/activities/initialize`, defaultActivities)
-            .then(() => {
-              console.log('Default activities initialized');
-              setUniqueActivities(new Map(defaultActivities.map(a => [a.date, a])));
-              setActivities(defaultActivities);
-            })
-            .catch(error => console.error('Error initializing activities:', error));
-        } else {
-          console.log('Setting activities from API response');
-          const activityMap = new Map(
-            response.data.map((a: Activity) => [a.date, a])
-          ) as Map<string, Activity>;
-          setUniqueActivities(activityMap);
-          setActivities(response.data);
-        }
+    
+    const fetchRegularActivities = axios.get(`${API_URL}/activities`);
+    const fetchAcademicActivities = axios.get(`${API_URL}/academic-activities`);
+
+    Promise.all([fetchRegularActivities, fetchAcademicActivities])
+      .then(([regularResponse, academicResponse]) => {
+        console.log('Fetched regular activities:', regularResponse.data);
+        console.log('Fetched academic activities:', academicResponse.data);
+        
+        const regularActivitiesMap = new Map(
+          regularResponse.data.map((activity: Activity) => [activity.date, activity] as [string, Activity])
+        );
+        setUniqueActivities(regularActivitiesMap as Map<string, Activity>);
+        setAcademicActivities(academicResponse.data);
         setIsLoading(false);
       })
       .catch(error => {
         console.error('Error fetching activities:', error);
-        if (error.response) {
-          console.error('Error response:', error.response.data);
-        }
         setIsLoading(false);
       });
-  }, []); // Empty dependency array
+  }, []);
 
   useEffect(() => {
     console.log('Current activities:', activities);
@@ -232,6 +229,69 @@ export default function Home() {
 
   console.log('isAdminLoggedIn:', isAdminLoggedIn);
 
+  const handleAcademicActivity = (date: string, action: 'add' | 'edit') => {
+    const activity = academicActivities.find(a => a.date === date);
+    const newName = prompt(action === 'add' ? 'Enter academic activity name:' : 'Enter new academic activity name:', activity?.name || '');
+    const newDescription = prompt(action === 'add' ? 'Enter academic activity description:' : 'Enter new academic activity description:', activity?.description || '');
+
+    if (newName && newDescription) {
+      const updatedActivity: Activity = {
+        date,
+        name: newName,
+        description: newDescription
+      };
+
+      const apiAction = action === 'add' ? 'post' : 'put';
+      const apiUrl = action === 'add' ? `${API_URL}/academic-activities` : `${API_URL}/academic-activities/${date}`;
+
+      axios[apiAction](apiUrl, updatedActivity)
+        .then(response => {
+          console.log(`Academic activity ${action}ed:`, response.data);
+          setAcademicActivities(prevActivities => {
+            const newActivities = prevActivities.filter(a => a.date !== date);
+            return [...newActivities, response.data];
+          });
+          setCalendarKey(prevKey => prevKey + 1);
+        })
+        .catch(error => {
+          console.error(`Error ${action}ing academic activity:`, error);
+          alert(`Failed to ${action} academic activity. Please try again.`);
+        });
+    }
+  };
+
+  const handleDeleteAcademicActivity = (date: string) => {
+    if (confirm('Are you sure you want to delete this academic activity?')) {
+      axios.delete(`${API_URL}/academic-activities/${date}`)
+        .then(() => {
+          console.log('Academic activity deleted');
+          setAcademicActivities(prevActivities => prevActivities.filter(a => a.date !== date));
+          setCalendarKey(prevKey => prevKey + 1);
+        })
+        .catch(error => {
+          console.error('Error deleting academic activity:', error);
+          alert('Failed to delete academic activity. Please try again.');
+        });
+    }
+  };
+
+  useEffect(() => {
+    if (showAcademicsCalendar) {
+      console.log('Fetching academic activities');
+      setIsLoading(true);
+      axios.get(`${API_URL}/academic-activities`)
+        .then(response => {
+          console.log('Fetched academic activities:', response.data);
+          setAcademicActivities(response.data);
+          setIsLoading(false);
+        })
+        .catch(error => {
+          console.error('Error fetching academic activities:', error);
+          setIsLoading(false);
+        });
+    }
+  }, [showAcademicsCalendar]);
+
   return (
     <div className={`min-h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 ${inter.className}`}>
       <motion.div
@@ -250,68 +310,77 @@ export default function Home() {
         >
           {/* Header */}
           <motion.header 
-            variants={fadeInUp} 
+            initial="hidden"
+            animate="visible"
+            variants={fadeInDown} 
             transition={pageTransition} 
-            className="bg-blue-100 text-gray-800 pt-1 pb-2 px-2 md:px-4 border-b border-gray-200 relative rounded-t-xl"
+            className="bg-white shadow-md p-1 sm:p-2 lg:p-3 rounded-lg mb-1 sm:mb-2 lg:mb-3"
           >
-            <div className="absolute top-1 right-2 text-[10px] md:text-xs text-gray-600">
-              Brought to you by{' '}
-              <a
-                href="https://www.instagram.com/saad__shaikh___/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-700 transition-colors"
-              >
-                Saad Shaikh
-              </a>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-32 h-32 md:w-48 md:h-48 lg:w-56 lg:h-56 rounded-full overflow-hidden flex-shrink-0 relative mb-1">
-                <Image 
-                  src="/1.webp" 
-                  alt="ANEES Logo" 
-                  width={500}
-                  height={500}
-                  style={{ objectFit: 'cover' }}
+            <div className="flex flex-col sm:flex-row justify-between items-center">
+              <div className="flex flex-col sm:flex-row items-center mb-0 sm:mb-0 -mt-8 sm:mt-0"> 
+                <div className="w-[180px] h-[180px] sm:w-[200px] sm:h-[200px] lg:w-[220px] lg:h-[220px] relative -mt-4 sm:-mt-2 md:-mt-6 lg:-mt-10 mb-1 sm:mb-0 sm:mr-4"> 
+                  <Image 
+                    src="/1.webp" 
+                    alt="ANEES Logo" 
+                    layout="fill"
+                    objectFit="contain"
+                  />
+                </div>
+                <div className="flex flex-col items-center sm:items-start">
+                  <h1 className={`text-2xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-4xl font-bold text-black ${roboto.className} leading-tight text-center sm:text-left -mt-8 sm:-mt-6 md:-mt-8 lg:-mt-10 mb-0 sm:mb-0 sm:-ml-3 md:-ml-5 lg:-ml-7`}>
+                    Anees Defence Career Institute
+                  </h1>
+                  <h2 className={`text-lg md:text-xl lg:text-2xl font-semibold text-blue-600 -mt-1 sm:mt-0`}>
+                    <span className={poppins.className}>
+                      {showAcademicsCalendar ? "Academics Calendar" : "Daily Activity Calendar"}
+                    </span>
+                  </h2>
+                </div>
+              </div>
+              <div className="flex flex-row items-center justify-center sm:justify-start space-x-4 w-full sm:w-auto mt-2 sm:mt-0 sm:-mt-4 md:-mt-6 lg:-mt-10">
+                {isAdminLoggedIn ? (
+                  <button
+                    onClick={handleLogout}
+                    className="px-2 py-1 text-xs sm:text-sm md:text-base text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-full shadow-md"
+                  >
+                    <span className="flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Logout
+                    </span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => setShowAdminModal(true)} 
+                    className="px-2 py-1 text-xs sm:text-sm md:text-base text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-full shadow-md"
+                  >
+                    <span className="flex items-center justify-center">
+                      <UserCog className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      Admin
+                    </span>
+                  </button>
+                )}
+                <ToggleSwitch
+                  label="Academics Calendar"
+                  checked={showAcademicsCalendar}
+                  onChange={() => setShowAcademicsCalendar(!showAcademicsCalendar)}
+                  size="small"
                 />
               </div>
-              <div className="-mt-8 md:-mt-12"> 
-                <h1 className={`text-xl md:text-2xl lg:text-3xl font-bold text-black ${roboto.className}`}>ANEES Defence Career Institute</h1>
-                <p className="text-xs md:text-sm lg:text-base text-gray-600">Empowering young minds for a brighter future</p>
-              </div>
-            </div>
-            <div className="absolute top-1 left-2 flex items-center">
-              {isAdminLoggedIn ? (
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-full shadow-md"
-                >
-                  <span className="flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6 mr-1 md:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Logout
-                  </span>
-                </button>
-              ) : (
-                <button 
-                  onClick={() => setShowAdminModal(true)} 
-                  className="px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-full shadow-md"
-                >
-                  <span className="flex items-center justify-center">
-                    <UserCog className="h-5 w-5 md:h-6 md:w-6 mr-1 md:mr-2" />
-                    Admin
-                  </span>
-                </button>
-              )}
             </div>
           </motion.header>
           
           {/* Main content */}
-          <motion.main variants={fadeInUp} transition={pageTransition} className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col shadow-inner mb-2 md:mb-4">
-            <div className="flex items-center justify-between mb-1 md:mb-2">
-              <h2 className={`text-lg md:text-xl lg:text-2xl font-semibold text-blue-600 ${roboto.className}`}>Daily Activity Calendar</h2>
-              <div className="relative w-full md:w-64 lg:w-80">
+          <motion.main 
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp} 
+            transition={pageTransition} 
+            className="flex-grow p-2 md:p-3 text-gray-800 overflow-hidden flex flex-col shadow-inner mb-2 md:mb-4 md:-mt-8"
+          >
+            <div className="flex items-center justify-end mb-1 md:mb-2">
+              <div className="relative w-48 xs:w-56 sm:w-64 md:w-72 lg:w-80">
                 <input
                   type="text"
                   placeholder="Search..."
@@ -344,7 +413,7 @@ export default function Home() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3 }}
-                  className="flex-grow bg-white rounded-xl shadow-md p-1 md:p-2 mb-2 md:mb-0 border border-gray-200 overflow-hidden flex flex-col"
+                  className="flex-grow bg-white rounded-xl shadow-md p-1 md:p-2 mb-2 md:mb-0 border border-gray-200 overflow-hidden flex flex-col md:max-h-[calc(100vh-180px)]" // Adjusted max-height
                 >
                   <div className="flex items-center justify-between mb-2 md:mb-4">
                     <button
@@ -377,7 +446,9 @@ export default function Home() {
                     ))}
                     {monthDays.map((day) => {
                       const dateString = format(day, 'yyyy-MM-dd');
-                      const activity = uniqueActivities.get(dateString);
+                      const activity = showAcademicsCalendar
+                        ? academicActivities.find(a => a.date === dateString)
+                        : uniqueActivities.get(dateString);
                       const isSelected = isSameDay(day, selectedDate);
                       const isCurrentDay = isToday(day);
                       return (
@@ -416,7 +487,11 @@ export default function Home() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  activity ? handleEditActivity(dateString) : handleAddActivity(dateString);
+                                  showAcademicsCalendar
+                                    ? handleAcademicActivity(dateString, activity ? 'edit' : 'add')
+                                    : activity
+                                    ? handleEditActivity(dateString)
+                                    : handleAddActivity(dateString);
                                 }}
                                 className="bg-blue-500 text-white text-[8px] xxs:text-[9px] xs:text-[10px] sm:text-xs md:text-sm p-0.5 xxs:p-1 sm:p-1.5 rounded-tr sm:rounded-tr-none sm:rounded-tl"
                               >
@@ -426,7 +501,9 @@ export default function Home() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleDeleteActivity(dateString);
+                                    showAcademicsCalendar
+                                      ? handleDeleteAcademicActivity(dateString)
+                                      : handleDeleteActivity(dateString);
                                   }}
                                   className="bg-red-500 text-white text-[8px] xxs:text-[9px] xs:text-[10px] sm:text-xs md:text-sm p-0.5 xxs:p-1 sm:p-1.5 rounded-tr"
                                 >
@@ -447,7 +524,7 @@ export default function Home() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-full mb-4 md:mb-6"
+                  className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-auto md:max-h-[calc(100vh-180px)] mb-4 md:mb-6" // Adjusted max-height
                 >
                   <div className="flex items-center space-x-2 mb-2">
                     <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-blue-400" />
@@ -461,7 +538,7 @@ export default function Home() {
                   </div>
                 </motion.div>
               ) : (
-                <div className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-full justify-center items-center mb-4 md:mb-6">
+                <div className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-auto md:max-h-[calc(100vh-180px)] justify-center items-center mb-4 md:mb-6"> 
                   <p className="text-gray-500 text-sm">No activity selected</p>
                 </div>
               )}
@@ -563,6 +640,84 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
