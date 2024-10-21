@@ -108,7 +108,7 @@ export default function Home() {
     setSearchTerm(term)
     if (term.length > 0) {
       const today = new Date()
-      const results = Array.from(uniqueActivities.values())
+      const results = (showAcademicsCalendar ? academicActivities : Array.from(uniqueActivities.values()))
         .filter(activity => 
           activity.name.toLowerCase().includes(term.toLowerCase()) ||
           activity.description.toLowerCase().includes(term.toLowerCase())
@@ -132,6 +132,11 @@ export default function Home() {
     setCalendarKey(prev => prev + 1) // Trigger re-render for animation
     setSearchTerm('')
     setSearchResults([])
+
+    // If the result is an academic activity, ensure the academic calendar is shown
+    if (showAcademicsCalendar !== academicActivities.some(a => a.date === result.date)) {
+      setShowAcademicsCalendar(!showAcademicsCalendar)
+    }
   }
 
   const handleAddActivity = (date: string) => {
@@ -548,7 +553,7 @@ export default function Home() {
           {/* Footer */}
           <motion.footer variants={fadeInUp} transition={pageTransition} className="bg-white/80 text-gray-600 p-1 border-t border-gray-200 mt-auto rounded-b-xl">
             <div className="text-center text-[10px] md:text-xs">
-              <p>&copy; {new Date().getFullYear()} ANEES Defence Career Institute. All rights reserved.</p>
+              <p>&copy; {new Date().getFullYear()} Anees Defence Career Institute. All rights reserved.</p>
             </div>
           </motion.footer>
         </motion.div>
@@ -640,6 +645,8 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
+
+
 
 
 
