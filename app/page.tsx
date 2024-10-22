@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parseISO, isToday, differenceInDays } from 'date-fns'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Search, UserCog } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -62,9 +62,7 @@ export default function Home() {
   const monthEnd = endOfMonth(currentMonth)
   const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
 
-  const selectedActivity = showAcademicsCalendar
-    ? academicActivities.find(a => a.date === format(selectedDate, 'yyyy-MM-dd'))
-    : uniqueActivities.get(format(selectedDate, 'yyyy-MM-dd'));
+  const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -74,30 +72,34 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
+  const fetchActivities = useCallback(async () => {
     console.log('Fetching activities');
     setIsLoading(true);
     
-    const fetchRegularActivities = axios.get(`${API_URL}/activities`);
-    const fetchAcademicActivities = axios.get(`${API_URL}/academic-activities`);
+    try {
+      const [regularResponse, academicResponse] = await Promise.all([
+        axios.get(`${API_URL}/activities`),
+        axios.get(`${API_URL}/academic-activities`)
+      ]);
 
-    Promise.all([fetchRegularActivities, fetchAcademicActivities])
-      .then(([regularResponse, academicResponse]) => {
-        console.log('Fetched regular activities:', regularResponse.data);
-        console.log('Fetched academic activities:', academicResponse.data);
-        
-        const regularActivitiesMap = new Map(
-          regularResponse.data.map((activity: Activity) => [activity.date, activity] as [string, Activity])
-        );
-        setUniqueActivities(regularActivitiesMap as Map<string, Activity>);
-        setAcademicActivities(academicResponse.data);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching activities:', error);
-        setIsLoading(false);
-      });
+      console.log('Fetched regular activities:', regularResponse.data);
+      console.log('Fetched academic activities:', academicResponse.data);
+      
+      const regularActivitiesMap = new Map(
+        regularResponse.data.map((activity: Activity) => [activity.date, activity] as [string, Activity])
+      );
+      setUniqueActivities(regularActivitiesMap as Map<string, Activity>);
+      setAcademicActivities(academicResponse.data);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchActivities();
+  }, [fetchActivities]);
 
   useEffect(() => {
     console.log('Current activities:', activities);
@@ -139,7 +141,7 @@ export default function Home() {
     }
   }
 
-  const handleAddActivity = (date: string) => {
+  const handleAddActivity = async (date: string) => {
     const newName = prompt('Enter activity name:');
     const newDescription = prompt('Enter activity description:');
 
@@ -150,25 +152,18 @@ export default function Home() {
         description: newDescription
       };
 
-      axios.post(`${API_URL}/activities`, newActivity)
-        .then(response => {
-          console.log('Activity added:', response.data);
-          setUniqueActivities(prevActivities => {
-            const newActivities = new Map(prevActivities);
-            newActivities.set(date, response.data);
-            return newActivities;
-          });
-          setActivities(prevActivities => [...prevActivities, response.data]);
-          setCalendarKey(prevKey => prevKey + 1);
-        })
-        .catch(error => {
-          console.error('Error adding activity:', error);
-          alert('Failed to add activity. Please try again.');
-        });
+      try {
+        const response = await axios.post(`${API_URL}/activities`, newActivity);
+        console.log('Activity added:', response.data);
+        await fetchActivities(); // Refresh the activities after adding
+      } catch (error) {
+        console.error('Error adding activity:', error);
+        alert('Failed to add activity. Please try again.');
+      }
     }
   };
 
-  const handleEditActivity = (date: string) => {
+  const handleEditActivity = async (date: string) => {
     const activity = uniqueActivities.get(date);
     const newName = prompt('Enter new activity name:', activity?.name || '');
     const newDescription = prompt('Enter new activity description:', activity?.description || '');
@@ -180,43 +175,27 @@ export default function Home() {
         description: newDescription
       };
 
-      axios.put(`${API_URL}/activities/${date}`, updatedActivity)
-        .then(response => {
-          console.log('Activity updated:', response.data);
-          setUniqueActivities(prevActivities => {
-            const newActivities = new Map(prevActivities);
-            newActivities.set(date, response.data);
-            return newActivities;
-          });
-          setActivities(prevActivities => 
-            prevActivities.map(a => a.date === date ? response.data : a)
-          );
-          setCalendarKey(prevKey => prevKey + 1);
-        })
-        .catch(error => {
-          console.error('Error updating activity:', error);
-          alert('Failed to update activity. Please try again.');
-        });
+      try {
+        const response = await axios.put(`${API_URL}/activities/${date}`, updatedActivity);
+        console.log('Activity updated:', response.data);
+        await fetchActivities(); // Refresh the activities after editing
+      } catch (error) {
+        console.error('Error updating activity:', error);
+        alert('Failed to update activity. Please try again.');
+      }
     }
   };
 
-  const handleDeleteActivity = (date: string) => {
+  const handleDeleteActivity = async (date: string) => {
     if (confirm('Are you sure you want to delete this activity?')) {
-      axios.delete(`${API_URL}/activities/${date}`)
-        .then(() => {
-          console.log('Activity deleted');
-          setUniqueActivities(prevActivities => {
-            const newActivities = new Map(prevActivities);
-            newActivities.delete(date);
-            return newActivities as Map<string, Activity>;
-          });
-          setActivities(prevActivities => prevActivities.filter(a => a.date !== date));
-          setCalendarKey(prevKey => prevKey + 1);
-        })
-        .catch(error => {
-          console.error('Error deleting activity:', error);
-          alert('Failed to delete activity. Please try again.');
-        });
+      try {
+        await axios.delete(`${API_URL}/activities/${date}`);
+        console.log('Activity deleted');
+        await fetchActivities(); // Refresh the activities after deleting
+      } catch (error) {
+        console.error('Error deleting activity:', error);
+        alert('Failed to delete activity. Please try again.');
+      }
     }
   };
 
@@ -296,6 +275,14 @@ export default function Home() {
         });
     }
   }, [showAcademicsCalendar]);
+
+  useEffect(() => {
+    const dateString = format(selectedDate, 'yyyy-MM-dd');
+    const activities = showAcademicsCalendar
+      ? academicActivities.filter(a => a.date === dateString)
+      : Array.from(uniqueActivities.values()).filter(a => a.date === dateString);
+    setSelectedActivities(activities);
+  }, [selectedDate, showAcademicsCalendar, academicActivities, uniqueActivities]);
 
   return (
     <div className={`min-h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 ${inter.className}`}>
@@ -451,9 +438,9 @@ export default function Home() {
                     ))}
                     {monthDays.map((day) => {
                       const dateString = format(day, 'yyyy-MM-dd');
-                      const activity = showAcademicsCalendar
-                        ? academicActivities.find(a => a.date === dateString)
-                        : uniqueActivities.get(dateString);
+                      const activities = showAcademicsCalendar
+                        ? academicActivities.filter(a => a.date === dateString)
+                        : Array.from(uniqueActivities.values()).filter(a => a.date === dateString);
                       const isSelected = isSameDay(day, selectedDate);
                       const isCurrentDay = isToday(day);
                       return (
@@ -479,11 +466,13 @@ export default function Home() {
                             } z-10 relative`}>
                               {format(day, 'd')}
                             </span>
-                            {activity && (
+                            {activities.length > 0 && (
                               <div className="mt-auto w-full">
-                                <p className="font-medium text-black text-[10px] md:text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
-                                  {activity.name}
-                                </p>
+                                {activities.map((activity, index) => (
+                                  <p key={index} className="font-medium text-black text-[10px] md:text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap w-full block">
+                                    {activity.name}
+                                  </p>
+                                ))}
                               </div>
                             )}
                           </button>
@@ -493,16 +482,16 @@ export default function Home() {
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   showAcademicsCalendar
-                                    ? handleAcademicActivity(dateString, activity ? 'edit' : 'add')
-                                    : activity
+                                    ? handleAcademicActivity(dateString, activities.length > 0 ? 'edit' : 'add')
+                                    : activities.length > 0
                                     ? handleEditActivity(dateString)
                                     : handleAddActivity(dateString);
                                 }}
                                 className="bg-blue-500 text-white text-[8px] xxs:text-[9px] xs:text-[10px] sm:text-xs md:text-sm p-0.5 xxs:p-1 sm:p-1.5 rounded-tr sm:rounded-tr-none sm:rounded-tl"
                               >
-                                {activity ? 'E' : 'A'}
+                                {activities.length > 0 ? 'E' : 'A'}
                               </button>
-                              {activity && (
+                              {activities.length > 0 && (
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -524,23 +513,25 @@ export default function Home() {
                 </motion.div>
               </AnimatePresence>
               
-              {selectedActivity ? (
+              {selectedActivities.length > 0 ? (
                 <motion.div 
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-auto md:max-h-[calc(100vh-180px)] mb-4 md:mb-6" // Adjusted max-height
+                  className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-auto md:max-h-[calc(100vh-180px)] mb-4 md:mb-6 overflow-y-auto"
                 >
                   <div className="flex items-center space-x-2 mb-2">
                     <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-blue-400" />
                     <h3 className="text-sm md:text-base lg:text-lg font-semibold text-black">
-                      {format(parseISO(selectedActivity.date), 'MMMM d, yyyy')}
+                      {format(selectedDate, 'MMMM d, yyyy')}
                     </h3>
                   </div>
-                  <div className="bg-blue-100 p-2 md:p-3 rounded-xl shadow-md flex-grow overflow-y-auto mb-2 md:mb-3">
-                    <h4 className="text-sm md:text-base lg:text-lg font-semibold text-black mb-1 md:mb-2">{selectedActivity.name}</h4>
-                    <p className="text-xs md:text-sm text-black">{selectedActivity.description}</p>
-                  </div>
+                  {selectedActivities.map((activity, index) => (
+                    <div key={index} className="bg-blue-100 p-2 md:p-3 rounded-xl shadow-md mb-2 md:mb-3">
+                      <h4 className="text-sm md:text-base lg:text-lg font-semibold text-black mb-1 md:mb-2">{activity.name}</h4>
+                      <p className="text-xs md:text-sm text-black">{activity.description}</p>
+                    </div>
+                  ))}
                 </motion.div>
               ) : (
                 <div className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-auto md:max-h-[calc(100vh-180px)] justify-center items-center mb-4 md:mb-6"> 
@@ -645,6 +636,16 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
+
+
+
+
+
+
+
+
+
+
 
 
 
