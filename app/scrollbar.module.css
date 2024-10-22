@@ -1,16 +1,10 @@
 .customScrollbar {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none;  /* For Internet Explorer and Edge */
 }
 
 .customScrollbar::-webkit-scrollbar {
-  display: none; /* WebKit */
-}
-
-/* Optional: If you want a subtle custom scrollbar instead of completely hiding it */
-/*
-.customScrollbar::-webkit-scrollbar {
-  width: 6px;
+  display: none; /* For Chrome, Safari, and Opera */
 }
 
 .customScrollbar::-webkit-scrollbar-track {
@@ -18,8 +12,14 @@
 }
 
 .customScrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+}
+
+.customScrollbar:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.customScrollbar:hover::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
-*/
-

@@ -518,7 +518,7 @@ export default function Home() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-auto md:max-h-[calc(100vh-180px)] mb-4 md:mb-6 overflow-y-auto"
+                  className={`w-full md:w-72 lg:w-80 bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-2 md:p-3 flex flex-col border border-gray-200 h-[140px] md:h-auto md:max-h-[calc(100vh-180px)] mb-4 md:mb-6 overflow-y-auto ${styles.customScrollbar}`}
                 >
                   <div className="flex items-center space-x-2 mb-2">
                     <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-blue-400" />
@@ -636,6 +636,8 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
+
+
 
 
 
