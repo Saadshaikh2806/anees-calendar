@@ -116,9 +116,14 @@ export default function Home() {
           activity.description.toLowerCase().includes(term.toLowerCase())
         )
         .sort((a, b) => {
-          const diffA = Math.abs(differenceInDays(parseISO(a.date), today))
-          const diffB = Math.abs(differenceInDays(parseISO(b.date), today))
-          return diffA - diffB
+          // First, sort by name
+          if (a.name < b.name) return -1;
+          if (a.name > b.name) return 1;
+          
+          // If names are the same, sort by date
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return dateA.getTime() - dateB.getTime();
         })
         .slice(0, 5) // Limit to 5 results
       setSearchResults(results)
@@ -639,6 +644,7 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
+
 
 
 
