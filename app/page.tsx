@@ -285,7 +285,7 @@ export default function Home() {
   }, [selectedDate, showAcademicsCalendar, academicActivities, uniqueActivities]);
 
   return (
-    <div className={`min-h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 ${inter.className}`}>
+    <div className="min-h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 pt-[calc(0.5rem-7.5px)] md:pt-3 lg:pt-4 ${inter.className}">
       <motion.div
         initial={{ filter: "blur(10px)", opacity: 0.3 }}
         animate={{ 
@@ -306,11 +306,11 @@ export default function Home() {
             animate="visible"
             variants={fadeInDown} 
             transition={pageTransition} 
-            className="bg-white p-1 sm:p-2 lg:p-3 rounded-lg mb-2 sm:mb-3 lg:mb-4 border-b border-gray-200" // Reduced bottom margin
+            className="bg-white p-1 sm:p-2 lg:p-3 rounded-lg mb-1 sm:mb-2 lg:mb-3 border-b border-gray-200 -mt-2 sm:mt-0" // Added -mt-4 for mobile
           >
             <div className="flex flex-col sm:flex-row justify-between items-center">
               <div className="flex flex-col sm:flex-row items-center mb-2 sm:mb-0"> 
-                <div className="w-[180px] h-[180px] sm:w-[200px] sm:h-[200px] lg:w-[220px] lg:h-[220px] relative -mt-4 sm:-mt-2 md:-mt-6 lg:-mt-10 mb-2 sm:mb-0 sm:mr-4"> 
+                <div className="w-[180px] h-[180px] sm:w-[200px] sm:h-[200px] lg:w-[220px] lg:h-[220px] relative -mt-8 sm:-mt-2 md:-mt-6 lg:-mt-10 mb-2 sm:mb-0 sm:mr-4"> 
                   <Image 
                     src="/1.webp" 
                     alt="ANEES Logo" 
@@ -319,10 +319,10 @@ export default function Home() {
                   />
                 </div>
                 <div className="flex flex-col items-center sm:items-start">
-                  <h1 className={`text-2xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-4xl font-bold text-black ${roboto.className} leading-tight text-center sm:text-left -mt-6 sm:-mt-4 md:-mt-6 lg:-mt-8 mb-1 sm:mb-2 sm:-ml-3 md:-ml-5 lg:-ml-7`}>
+                  <h1 className={`text-2xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-4xl font-bold text-black ${roboto.className} leading-tight text-center sm:text-left -mt-6 sm:-mt-4 md:-mt-6 lg:-mt-8 mb-0 sm:mb-0 sm:-ml-3 md:-ml-5 lg:-ml-7`}>
                     Anees Defence Career Institute
                   </h1>
-                  <h2 className={`text-lg md:text-xl lg:text-2xl font-semibold text-blue-600 mt-1 sm:mt-0`}>
+                  <h2 className={`text-lg md:text-xl lg:text-2xl font-semibold text-blue-600 mt-0 sm:mt-0`}>
                     <span className={poppins.className}>
                       {showAcademicsCalendar ? "Academics Calendar" : "Daily Activity Calendar"}
                     </span>
@@ -639,6 +639,10 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
+
+
+
+
 
 
 
