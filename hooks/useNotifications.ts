@@ -6,10 +6,13 @@ type Activity = {
   name: string;
   date: string;
   description: string;
+  isAcademic?: boolean;
 };
 
 export const useNotifications = () => {
   const [lastNotificationDate, setLastNotificationDate] = useState<string | null>(null);
+  const [notificationData, setNotificationData] = useState({ regularActivities: '', academicActivities: '' });
+  const [isNotificationVisible, setIsNotificationVisible] = useState<boolean>(false);
 
   const checkUpcomingEvents = useCallback((activities: Activity[]) => {
     const now = new Date();
@@ -26,51 +29,27 @@ export const useNotifications = () => {
       const shouldNotify = !lastNotification || !isSameDay(lastNotification, now);
 
       if (shouldNotify) {
-        showNotification(upcomingActivities);
+        const regularActivities = upcomingActivities.filter(a => !a.isAcademic);
+        const academicActivities = upcomingActivities.filter(a => a.isAcademic);
+
+        setNotificationData({
+          regularActivities: regularActivities.map(a => a.name).join(', ') || 'demo',
+          academicActivities: academicActivities.map(a => a.name).join(', ') || 'demo'
+        });
+        setIsNotificationVisible(true);
         setLastNotificationDate(now.toISOString());
         localStorage.setItem('lastNotificationDate', now.toISOString());
       }
     }
   }, [lastNotificationDate]);
-
-  const showNotification = (activities: Activity[]) => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission === 'granted') {
-        createNotification(activities);
-      } else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then(permission => {
-          if (permission === 'granted') {
-            createNotification(activities);
-          }
-        });
-      }
-    } else {
-      console.log('Notifications not supported in this browser');
-      alert(`Upcoming activities: ${activities.map(a => a.name).join(', ')}`);
-    }
+  const closeNotification = () => {
+    setIsNotificationVisible(false);
   };
 
-  const createNotification = (activities: Activity[]) => {
-    try {
-      const title = 'Upcoming Activities';
-      const options = {
-        body: activities.map(a => `${a.name} on ${a.date}`).join('\n'),
-        icon: '/icon.png'
-      };
-
-      new Notification(title, options);
-    } catch (error) {
-      console.error('Error creating notification:', error);
-      alert(`Upcoming activities: ${activities.map(a => a.name).join(', ')}`);
-    }
+  return {
+    checkUpcomingEvents,
+    notificationData,
+    isNotificationVisible,
+    closeNotification
   };
-
-  useEffect(() => {
-    const storedDate = localStorage.getItem('lastNotificationDate');
-    if (storedDate) {
-      setLastNotificationDate(storedDate);
-    }
-  }, []);
-
-  return { checkUpcomingEvents };
 };

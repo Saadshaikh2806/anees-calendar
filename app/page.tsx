@@ -11,6 +11,7 @@ import styles from './scrollbar.module.css';
 import ToggleSwitch from '@/components/ToggleSwitch';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Activity } from '@/types'; // Adjust the import path as needed
+import Notification from '../components/Notification';
 
 const inter = Inter({ subsets: ['latin'] })
 const roboto = Roboto({ weight: ['400', '500', '700'], subsets: ['latin'] })
@@ -63,7 +64,9 @@ export default function Home() {
 
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
-  const { checkUpcomingEvents } = useNotifications();
+  const { checkUpcomingEvents, notificationData, isNotificationVisible, closeNotification } = useNotifications();
+
+  const exams = "demo";
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -291,37 +294,12 @@ export default function Home() {
   }, [selectedDate, showAcademicsCalendar, academicActivities, uniqueActivities]);
 
   useEffect(() => {
-    const allActivities = [...Array.from(uniqueActivities.values()), ...academicActivities];
+    const allActivities = [
+      ...Array.from(uniqueActivities.values()).map(a => ({ ...a, isAcademic: false })),
+      ...academicActivities.map(a => ({ ...a, isAcademic: true }))
+    ];
     
-    // Check immediately when component mounts
     checkUpcomingEvents(allActivities);
-
-    // Function to schedule the next check at 12 PM
-    const scheduleNextCheck = () => {
-      const now = new Date();
-      const nextNoon = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0);
-      
-      // If it's already past noon, schedule for tomorrow
-      if (now > nextNoon) {
-        nextNoon.setDate(nextNoon.getDate() + 1);
-      }
-      
-      const msUntilNextCheck = nextNoon.getTime() - now.getTime();
-      
-      return setTimeout(() => {
-        checkUpcomingEvents(allActivities);
-        // Schedule the next check
-        scheduleNextCheck();
-      }, msUntilNextCheck);
-    };
-
-    // Initial scheduling
-    const timeoutId = scheduleNextCheck();
-
-    // Cleanup function
-    return () => {
-      clearTimeout(timeoutId);
-    };
   }, [uniqueActivities, academicActivities, checkUpcomingEvents]);
 
   useEffect(() => {
@@ -674,6 +652,13 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <Notification 
+        regularActivities={notificationData.regularActivities}
+        academicActivities={notificationData.academicActivities}
+        isVisible={isNotificationVisible}
+        onClose={closeNotification}
+      />
     </div>
   )
 }
