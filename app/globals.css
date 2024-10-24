@@ -2,6 +2,14 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+@font-face {
+  font-family: 'YourFontName';
+  src: url('/_next/static/media/da897b99eb1fe4a1-s.p.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -21,7 +29,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'YourFontName', sans-serif;
   background-color: #000000; /* Black background */
   font-size: 16px; /* Base font size */
 }

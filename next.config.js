@@ -2,8 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
-    ignoreDuringBuilds: true, // This will ignore ESLint errors during the build process
+    ignoreDuringBuilds: true,
   },
+  optimizeFonts: false, // You can try setting this to false
 }
 
 module.exports = nextConfig
