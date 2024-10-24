@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 import React, { useState, useEffect, useCallback } from 'react'
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parseISO, isToday, differenceInDays } from 'date-fns'
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parseISO, isToday, differenceInDays, parse, isAfter } from 'date-fns'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Search, UserCog } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
@@ -9,6 +9,8 @@ import { Inter, Roboto, Poppins } from 'next/font/google'
 import axios from 'axios';
 import styles from './scrollbar.module.css';
 import ToggleSwitch from '@/components/ToggleSwitch';
+import { useNotifications } from '@/hooks/useNotifications';
+import { Activity } from '@/types'; // Adjust the import path as needed
 
 const inter = Inter({ subsets: ['latin'] })
 const roboto = Roboto({ weight: ['400', '500', '700'], subsets: ['latin'] })
@@ -30,11 +32,6 @@ const pageTransition = {
   duration: 0.5
 };
 
-interface Activity {
-  date: string;
-  name: string;
-  description: string;
-}
 //----
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '/.netlify/functions/api';
 console.log('API_URL:', API_URL);
@@ -63,6 +60,10 @@ export default function Home() {
   const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
 
   const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
+
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  const { checkUpcomingEvents } = useNotifications();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -288,6 +289,59 @@ export default function Home() {
       : Array.from(uniqueActivities.values()).filter(a => a.date === dateString);
     setSelectedActivities(activities);
   }, [selectedDate, showAcademicsCalendar, academicActivities, uniqueActivities]);
+
+  useEffect(() => {
+    const allActivities = [...Array.from(uniqueActivities.values()), ...academicActivities];
+    
+    // Check immediately when component mounts
+    checkUpcomingEvents(allActivities, true);
+
+    // Function to schedule the next check
+    const scheduleNextCheck = () => {
+      const now = new Date();
+      const nextNoon = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0);
+      
+      // If it's already past noon, schedule for tomorrow
+      if (now > nextNoon) {
+        nextNoon.setDate(nextNoon.getDate() + 1);
+      }
+      
+      const msUntilNextCheck = nextNoon.getTime() - now.getTime();
+      
+      return setTimeout(() => {
+        checkUpcomingEvents(allActivities);
+        // Schedule the next check
+        scheduleNextCheck();
+      }, msUntilNextCheck);
+    };
+
+    // Initial scheduling
+    const timeoutId = scheduleNextCheck();
+
+    // Cleanup function
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [uniqueActivities, academicActivities, checkUpcomingEvents]);
+
+  useEffect(() => {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    });
+  }, []);
+
+  const handleAddToHomeScreen = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: { outcome: string }) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
+        }
+        setDeferredPrompt(null);
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white p-2 md:p-3 lg:p-4 pt-[calc(0.5rem-7.5px)] md:pt-3 lg:pt-4 ${inter.className}">
@@ -581,8 +635,7 @@ export default function Home() {
                 className="animate-pulse"
               />
             </motion.div>
-          </motion.div>
-        )}
+          </motion.div>        )}
       </AnimatePresence>
 
       {showAdminModal && (
@@ -644,141 +697,4 @@ function generateDefaultActivities(): Activity[] {
 }
 
 console.log('API function loaded');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
