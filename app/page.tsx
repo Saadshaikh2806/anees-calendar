@@ -294,9 +294,9 @@ export default function Home() {
     const allActivities = [...Array.from(uniqueActivities.values()), ...academicActivities];
     
     // Check immediately when component mounts
-    checkUpcomingEvents(allActivities, true);
+    checkUpcomingEvents(allActivities);
 
-    // Function to schedule the next check
+    // Function to schedule the next check at 12 PM
     const scheduleNextCheck = () => {
       const now = new Date();
       const nextNoon = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0);

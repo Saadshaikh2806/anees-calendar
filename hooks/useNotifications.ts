@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { format, parseISO, isAfter, parse } from 'date-fns';
+import { format, parseISO, isAfter, parse, isSameDay } from 'date-fns';
 
 // Add this type definition
 type Activity = {
@@ -11,7 +11,7 @@ type Activity = {
 export const useNotifications = () => {
   const [lastNotificationDate, setLastNotificationDate] = useState<string | null>(null);
 
-  const checkUpcomingEvents = useCallback((activities: Activity[], initialCheck = false) => {
+  const checkUpcomingEvents = useCallback((activities: Activity[]) => {
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -22,15 +22,22 @@ export const useNotifications = () => {
     });
 
     if (upcomingActivities.length > 0) {
-      showNotification(upcomingActivities, initialCheck);
-    }
-  }, []);
+      const lastNotification = lastNotificationDate ? new Date(lastNotificationDate) : null;
+      const shouldNotify = !lastNotification || !isSameDay(lastNotification, now);
 
-  const showNotification = (activities: Activity[], initialCheck: boolean) => {
+      if (shouldNotify) {
+        showNotification(upcomingActivities);
+        setLastNotificationDate(now.toISOString());
+        localStorage.setItem('lastNotificationDate', now.toISOString());
+      }
+    }
+  }, [lastNotificationDate]);
+
+  const showNotification = (activities: Activity[]) => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'granted') {
         createNotification(activities);
-      } else if (Notification.permission !== 'denied' || initialCheck) {
+      } else if (Notification.permission !== 'denied') {
         Notification.requestPermission().then(permission => {
           if (permission === 'granted') {
             createNotification(activities);
@@ -38,7 +45,6 @@ export const useNotifications = () => {
         });
       }
     } else {
-      // Fallback for browsers that don't support notifications
       console.log('Notifications not supported in this browser');
       alert(`Upcoming activities: ${activities.map(a => a.name).join(', ')}`);
     }
@@ -49,16 +55,22 @@ export const useNotifications = () => {
       const title = 'Upcoming Activities';
       const options = {
         body: activities.map(a => `${a.name} on ${a.date}`).join('\n'),
-        icon: '/icon.png' // Make sure this path is correct
+        icon: '/icon.png'
       };
 
       new Notification(title, options);
     } catch (error) {
       console.error('Error creating notification:', error);
-      // Fallback to alert
       alert(`Upcoming activities: ${activities.map(a => a.name).join(', ')}`);
     }
   };
+
+  useEffect(() => {
+    const storedDate = localStorage.getItem('lastNotificationDate');
+    if (storedDate) {
+      setLastNotificationDate(storedDate);
+    }
+  }, []);
 
   return { checkUpcomingEvents };
 };
